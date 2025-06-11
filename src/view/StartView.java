@@ -37,14 +37,10 @@ public class StartView extends JPanel {
     private static final Color WARNA_JUDUL = Color.YELLOW;
     private static final Color WARNA_TEKS = Color.WHITE;
     private static final Color WARNA_TOMBOL_MULAI = new Color(50, 150, 50, 220);
-    private static final Color WARNA_TRANSPARAN = new Color(0, 0, 0, 0); // Tetap untuk komponen yang ingin transparan penuh
+    private static final Color WARNA_TRANSPARAN = new Color(0, 0, 0, 0);
     private static final Color WARNA_INPUT_BACKGROUND = new Color(255, 255, 255, 200);
 
-    // ************ BARU/MODIFIKASI ************
-    // Warna semi-transparan untuk background sel tabel
-    private static final Color WARNA_SEL_TABEL_BACKGROUND = new Color(0, 0, 0, 100); // Hitam, alpha 100 (sekitar 40% opak)
-    // *******************************************
-
+    private static final Color WARNA_SEL_TABEL_BACKGROUND = new Color(0, 0, 0, 100);
 
     /**
      * Constructor - Membuat tampilan halaman start
@@ -57,7 +53,7 @@ public class StartView extends JPanel {
         inisialisasiPanel();
         buatKomponenUI();
         aturEventListener();
-        muatDataSkorTertinggi();
+        muatDataSkorTertinggi(); // Panggil di sini agar tabel terisi saat StartView pertama kali muncul atau kembali dari game
     }
 
     /**
@@ -66,11 +62,7 @@ public class StartView extends JPanel {
     private void inisialisasiPanel() {
         setPreferredSize(UKURAN_PANEL);
         setLayout(new GridBagLayout());
-        // ************ BARU/MODIFIKASI ************
-        // Pastikan panel ini opaque agar selalu membersihkan area sebelum digambar
-        // JPanel defaultnya sudah opaque, tapi tidak ada salahnya memastikan
         setOpaque(true);
-        // *******************************************
     }
 
     /**
@@ -167,7 +159,7 @@ public class StartView extends JPanel {
             }
         };
 
-        // Membuat tabel normal (tidak override header)
+        // Membuat tabel normal
         tabelSkorTertinggi = new JTable(modelTabel);
 
         aturGayaTabel();
@@ -176,11 +168,8 @@ public class StartView extends JPanel {
         // Membungkus tabel dalam scroll pane
         JScrollPane scrollPane = new JScrollPane(tabelSkorTertinggi);
         scrollPane.setPreferredSize(UKURAN_TABEL);
-        // ************ MODIFIKASI ************
-        // Biarkan viewport tidak opak, tapi scrollPane itu sendiri bisa punya background
         scrollPane.getViewport().setOpaque(false);
-        scrollPane.setOpaque(false); // Biarkan scroll pane transparan agar background panel terlihat
-        // ************************************
+        scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
 
         gbc.gridx = 0;
@@ -203,51 +192,34 @@ public class StartView extends JPanel {
         tabelSkorTertinggi.setGridColor(Color.BLACK);
         tabelSkorTertinggi.setSelectionForeground(WARNA_TEKS);
 
-        // Membuat body tabel transparan (hanya isi data)
-        // ************ MODIFIKASI ************
-        // Biarkan tabel itu sendiri opaque, dan kita akan mengatur transparansi di cell renderer.
-        // Ini seringkali lebih stabil untuk JTable.
         tabelSkorTertinggi.setOpaque(false);
-        // Background tabel tetap transparan, karena cell renderer yang akan menggambar background setiap sel.
         tabelSkorTertinggi.setBackground(WARNA_TRANSPARAN);
-        // ************************************
 
-        // Header tetap solid dengan background gelap untuk kontras
         JTableHeader header = tabelSkorTertinggi.getTableHeader();
         header.setOpaque(true);
-        header.setBackground(new Color(50, 50, 50, 200)); // Background gelap semi-transparan
+        header.setBackground(new Color(50, 50, 50, 200));
         header.setForeground(WARNA_TEKS);
         header.setFont(new Font("Arial", Font.BOLD, 22));
-        // ************ BARU/MODIFIKASI ************
-        // Pastikan header menggunakan renderer default atau renderer kustom jika diperlukan
-        // untuk memastikan teks di tengah atau gaya lainnya.
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-        // *******************************************
     }
 
     /**
-     * Mengatur renderer untuk sel tabel (header sudah diatur di aturGayaTabel)
+     * Mengatur renderer untuk sel tabel
      */
     private void aturRendererTabel() {
-        // Renderer untuk sel data (transparan dengan teks putih)
         DefaultTableCellRenderer rendererSel = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                                                            boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 c.setForeground(WARNA_TEKS);
-                // ************ MODIFIKASI UTAMA ************
-                // Beri background semi-transparan pada setiap sel, bukan transparan penuh
-                c.setBackground(WARNA_SEL_TABEL_BACKGROUND); // Gunakan warna semi-transparan baru
-                // *******************************************
+                c.setBackground(WARNA_SEL_TABEL_BACKGROUND);
 
-                // Tengahkan teks di semua kolom
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
                 return c;
             }
         };
 
-        // Menerapkan renderer hanya ke sel data (bukan header)
         for (int i = 0; i < tabelSkorTertinggi.getColumnCount(); i++) {
             tabelSkorTertinggi.getColumnModel().getColumn(i).setCellRenderer(rendererSel);
         }
@@ -266,7 +238,7 @@ public class StartView extends JPanel {
         tombolKeluar.setFocusPainted(false);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 4; // Menyesuaikan posisi karena tabel highscore ada di gridy 3
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         add(tombolKeluar, gbc);
@@ -308,6 +280,7 @@ public class StartView extends JPanel {
      */
     private void mulaiGame(String namaPemain) {
         viewModel.setPlayerName(namaPemain);
+        viewModel.resetGame(); // Reset game state for a new game
 
         // Membersihkan frame dan menampilkan game view
         frameUtama.getContentPane().removeAll();
@@ -323,13 +296,11 @@ public class StartView extends JPanel {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // Penting: Ini memastikan area panel dibersihkan
+        super.paintComponent(g);
 
         if (gambarLatar != null) {
-            // Menggambar gambar background yang menyesuaikan ukuran panel
             g.drawImage(gambarLatar, 0, 0, getWidth(), getHeight(), this);
         } else {
-            // Fallback jika tidak ada gambar background
             g.setColor(Color.DARK_GRAY);
             g.fillRect(0, 0, getWidth(), getHeight());
         }

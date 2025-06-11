@@ -15,8 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
 import java.util.Random;
-import java.sql.ResultSet; // Import ResultSet
-import java.sql.SQLException; // Import SQLException
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class GameViewModel {
     private Player player;
@@ -45,7 +45,7 @@ public class GameViewModel {
 
     private int currentFramePlayer = 0;
     private int originalFrameWidthPlayer;
-    private int originalFrameHeightPlayer;
+    private int originalFrameHeightPlayer; // <-- Ini yang benar
     private int totalFramesPlayer;
     private long lastFrameTimePlayer;
     private final long FRAME_DELAY_PLAYER = 70;
@@ -56,7 +56,7 @@ public class GameViewModel {
 
     private int currentFramePlayerHurt = 1;
     private long lastFrameTimePlayerHurt;
-    private final long FRAME_DELAY_PLAYER_HURT = 250; // Correctly defined as uppercase HURT
+    private final long FRAME_DELAY_PLAYER_HURT = 250;
 
     private final int SCALE_FACTOR_PLAYER = 5;
     private final int SCALE_FACTOR_ENEMY = 3;
@@ -68,7 +68,7 @@ public class GameViewModel {
     private final int COIN_COLLECT_SPEED = 10;
 
     private int score = 0;
-    private int coinsCollectedCount = 0; // NEW: Track collected coins count
+    private int coinsCollectedCount = 0;
 
     private long gameStartTime;
     private final long GAME_DURATION = 30 * 1000;
@@ -82,131 +82,131 @@ public class GameViewModel {
 
     private String playerName = "Guest";
 
-    public GameViewModel(int panelWidth, int panelHeight) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.gamePanelWidth = panelWidth; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.gamePanelHeight = panelHeight; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.random = new Random(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.db = new Database(); // Inisialisasi database // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public GameViewModel(int panelWidth, int panelHeight) {
+        this.gamePanelWidth = panelWidth;
+        this.gamePanelHeight = panelHeight;
+        this.random = new Random();
+        this.db = new Database();
 
-        TOP_LANE_Y = (int) (gamePanelHeight * 0.25); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        BOTTOM_LANE_Y = (int) (gamePanelHeight * 0.75); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        TOP_LANE_Y = (int) (gamePanelHeight * 0.25);
+        BOTTOM_LANE_Y = (int) (gamePanelHeight * 0.75);
 
-        URL playerImageUrl = getClass().getClassLoader().getResource("assets/soldier-walk.png"); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (playerImageUrl != null) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            try { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                fullSpriteSheetPlayer = ImageIO.read(playerImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Sprite sheet pemain berhasil dimuat: " + playerImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                originalFrameWidthPlayer = fullSpriteSheetPlayer.getWidth() / 8; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                originalFrameHeightPlayer = fullSpriteSheetPlayer.getHeight(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                totalFramesPlayer = 8; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } catch (IOException e) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.err.println("ERROR: Gagal memuat sprite sheet pemain: " + e.getMessage()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                fullSpriteSheetPlayer = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        URL playerImageUrl = getClass().getClassLoader().getResource("assets/soldier-walk.png");
+        if (playerImageUrl != null) {
+            try {
+                fullSpriteSheetPlayer = ImageIO.read(playerImageUrl);
+                System.out.println("Sprite sheet pemain berhasil dimuat: " + playerImageUrl);
+                originalFrameWidthPlayer = fullSpriteSheetPlayer.getWidth() / 8;
+                originalFrameHeightPlayer = fullSpriteSheetPlayer.getHeight();
+                totalFramesPlayer = 8;
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat sprite sheet pemain: " + e.getMessage());
+                fullSpriteSheetPlayer = null;
             }
         } else {
-            System.err.println("ERROR: Sprite sheet pemain tidak ditemukan di assets/soldier-walk.png."); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            fullSpriteSheetPlayer = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            System.err.println("ERROR: Sprite sheet pemain tidak ditemukan di assets/soldier-walk.png.");
+            fullSpriteSheetPlayer = null;
         }
 
-        URL playerHurtImageUrl = getClass().getClassLoader().getResource("assets/soldier-hurt.png"); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (playerHurtImageUrl != null) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            try { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                fullSpriteSheetPlayerHurt = ImageIO.read(playerHurtImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Sprite sheet pemain hurt berhasil dimuat: " + playerHurtImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } catch (IOException e) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.err.println("ERROR: Gagal memuat sprite sheet pemain hurt: " + e.getMessage()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                fullSpriteSheetPlayerHurt = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        URL playerHurtImageUrl = getClass().getClassLoader().getResource("assets/soldier-hurt.png");
+        if (playerHurtImageUrl != null) {
+            try {
+                fullSpriteSheetPlayerHurt = ImageIO.read(playerHurtImageUrl);
+                System.out.println("Sprite sheet pemain hurt berhasil dimuat: " + playerHurtImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat sprite sheet pemain hurt: " + e.getMessage());
+                fullSpriteSheetPlayerHurt = null;
             }
         } else {
-            System.err.println("ERROR: Sprite sheet pemain hurt tidak ditemukan di assets/soldier-hurt.png."); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            fullSpriteSheetPlayerHurt = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            System.err.println("ERROR: Sprite sheet pemain hurt tidak ditemukan di assets/soldier-hurt.png.");
+            fullSpriteSheetPlayerHurt = null;
         }
 
-        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background-cave.png"); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (backgroundImageUrl != null) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            try { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                backgroundImage = ImageIO.read(backgroundImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Gambar latar belakang berhasil dimuat: " + backgroundImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background-cave.png");
+        if (backgroundImageUrl != null) {
+            try {
+                backgroundImage = ImageIO.read(backgroundImageUrl);
+                System.out.println("Gambar latar belakang berhasil dimuat: " + backgroundImageUrl);
             }
-            catch (IOException e) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.err.println("ERROR: Gagal memuat gambar latar belakang: " + e.getMessage()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                backgroundImage = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            }
-        } else {
-            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background-cave.png."); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            backgroundImage = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        }
-
-        URL orcImageUrl = getClass().getClassLoader().getResource("assets/orc-attack.png"); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (orcImageUrl != null) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            try { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                fullSpriteSheetOrc = ImageIO.read(orcImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Sprite sheet orc berhasil dimuat: " + orcImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } catch (IOException e) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.err.println("ERROR: Gagal memuat sprite sheet orc: " + e.getMessage()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                fullSpriteSheetOrc = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat gambar latar belakang: " + e.getMessage());
+                backgroundImage = null;
             }
         } else {
-            System.err.println("ERROR: Sprite sheet orc tidak ditemukan di assets/orc-attack.png."); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            fullSpriteSheetOrc = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background-cave.png.");
+            backgroundImage = null;
         }
 
-        URL coinImageUrl = getClass().getClassLoader().getResource("assets/coin.png"); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (coinImageUrl != null) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            try { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                coinImage = ImageIO.read(coinImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Gambar koin berhasil dimuat: " + coinImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } catch (IOException e) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.err.println("ERROR: Gagal memuat gambar koin: " + e.getMessage()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                coinImage = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        URL orcImageUrl = getClass().getClassLoader().getResource("assets/orc-attack.png");
+        if (orcImageUrl != null) {
+            try {
+                fullSpriteSheetOrc = ImageIO.read(orcImageUrl);
+                System.out.println("Sprite sheet orc berhasil dimuat: " + orcImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat sprite sheet orc: " + e.getMessage());
+                fullSpriteSheetOrc = null;
             }
         } else {
-            System.err.println("ERROR: Gambar koin tidak ditemukan di assets/coin.png."); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            coinImage = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            System.err.println("ERROR: Sprite sheet orc tidak ditemukan di assets/orc-attack.png.");
+            fullSpriteSheetOrc = null;
         }
 
-        URL chestImageUrl = getClass().getClassLoader().getResource("assets/chest-open.png"); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (chestImageUrl != null) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            try { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                chestOpenImage = ImageIO.read(chestImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Gambar peti terbuka berhasil dimuat: " + chestImageUrl); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } catch (IOException e) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.err.println("ERROR: Gagal memuat gambar peti terbuka: " + e.getMessage()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                chestOpenImage = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        URL coinImageUrl = getClass().getClassLoader().getResource("assets/coin.png");
+        if (coinImageUrl != null) {
+            try {
+                coinImage = ImageIO.read(coinImageUrl);
+                System.out.println("Gambar koin berhasil dimuat: " + coinImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat gambar koin: " + e.getMessage());
+                coinImage = null;
             }
         } else {
-            System.err.println("ERROR: Gambar peti terbuka tidak ditemukan di assets/chest-open.png."); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            chestOpenImage = null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            System.err.println("ERROR: Gambar koin tidak ditemukan di assets/coin.png.");
+            coinImage = null;
         }
 
-        int playerDisplayWidth = originalFrameWidthPlayer * SCALE_FACTOR_PLAYER; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        int playerDisplayHeight = originalFrameHeightPlayer * SCALE_FACTOR_PLAYER; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        URL chestImageUrl = getClass().getClassLoader().getResource("assets/chest-open.png");
+        if (chestImageUrl != null) {
+            try {
+                chestOpenImage = ImageIO.read(chestImageUrl);
+                System.out.println("Gambar peti terbuka berhasil dimuat: " + chestImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat gambar peti terbuka: " + e.getMessage());
+                chestOpenImage = null;
+            }
+        } else {
+            System.err.println("ERROR: Gambar peti terbuka tidak ditemukan di assets/chest-open.png.");
+            chestOpenImage = null;
+        }
 
-        this.player = new Player( // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                panelWidth / 2 - (playerDisplayWidth / 2), // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                panelHeight / 2 - (playerDisplayHeight / 2), // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                playerDisplayWidth, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                playerDisplayHeight, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                fullSpriteSheetPlayer // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        int playerDisplayWidth = originalFrameWidthPlayer * SCALE_FACTOR_PLAYER;
+        int playerDisplayHeight = originalFrameHeightPlayer * SCALE_FACTOR_PLAYER;
+
+        this.player = new Player(
+                panelWidth / 2 - (playerDisplayWidth / 2),
+                panelHeight / 2 - (playerDisplayHeight / 2),
+                playerDisplayWidth,
+                playerDisplayHeight,
+                fullSpriteSheetPlayer
         );
 
-        orcs = new ArrayList<>(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        coins = new ArrayList<>(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        orcs = new ArrayList<>();
+        coins = new ArrayList<>();
 
-        chestDisplayWidth = 100; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        chestDisplayHeight = 100; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        chestPosX = 10; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        chestPosY = 30 + 10 + 30; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        chestDisplayWidth = 100;
+        chestDisplayHeight = 100;
+        chestPosX = 10;
+        chestPosY = 30 + 10 + 30;
 
-        lastFrameTimePlayer = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        mousePosition = new Point(0,0); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        lastFrameTimePlayer = System.currentTimeMillis();
+        mousePosition = new Point(0,0);
 
-        this.gameStartTime = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.lastSpawnTime = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        this.gameStartTime = System.currentTimeMillis();
+        this.lastSpawnTime = System.currentTimeMillis();
     }
 
-    public void setPlayerName(String playerName) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.playerName = playerName; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 
     public void resetGame() {
@@ -224,7 +224,7 @@ public class GameViewModel {
 
         // Reset score, coins collected, and game state
         score = 0;
-        coinsCollectedCount = 0; // NEW: Reset coins collected count
+        coinsCollectedCount = 0;
         isGameOver = false;
         gameStartTime = System.currentTimeMillis();
         lastSpawnTime = System.currentTimeMillis();
@@ -236,260 +236,267 @@ public class GameViewModel {
         System.out.println("Game state has been reset.");
     }
 
-    public void setPlayerMovementDirection(int keyCode, boolean isPressed) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (isGameOver) return; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public void setGameOver(boolean gameOver) {
+        this.isGameOver = gameOver;
+        if (gameOver) {
+            saveGameResult(score, coinsCollectedCount); // Simpan skor saat game berakhir
+        }
+    }
 
-        if (isPressed) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            if (keyCode == KeyEvent.VK_LEFT) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                player.setVelocityX(-PLAYER_SPEED); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } else if (keyCode == KeyEvent.VK_RIGHT) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                player.setVelocityX(PLAYER_SPEED); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } else if (keyCode == KeyEvent.VK_UP) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                player.setVelocityY(-PLAYER_SPEED); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } else if (keyCode == KeyEvent.VK_DOWN) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                player.setVelocityY(PLAYER_SPEED); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public void setPlayerMovementDirection(int keyCode, boolean isPressed) {
+        if (isGameOver) return;
+
+        if (isPressed) {
+            if (keyCode == KeyEvent.VK_LEFT) {
+                player.setVelocityX(-PLAYER_SPEED);
+            } else if (keyCode == KeyEvent.VK_RIGHT) {
+                player.setVelocityX(PLAYER_SPEED);
+            } else if (keyCode == KeyEvent.VK_UP) {
+                player.setVelocityY(-PLAYER_SPEED);
+            } else if (keyCode == KeyEvent.VK_DOWN) {
+                player.setVelocityY(PLAYER_SPEED);
             }
         } else {
-            if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_RIGHT) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                player.setVelocityX(0); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } else if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_DOWN) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                player.setVelocityY(0); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_RIGHT) {
+                player.setVelocityX(0);
+            } else if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_DOWN) {
+                player.setVelocityY(0);
             }
 
-            if (player.getVelocityX() == 0 && player.getVelocityY() == 0) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                currentFramePlayer = 0; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (player.getVelocityX() == 0 && player.getVelocityY() == 0) {
+                currentFramePlayer = 0;
             }
         }
     }
 
-    public void setLassoActive(boolean active) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (isGameOver) return; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.isLassoActive = active; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public void setLassoActive(boolean active) {
+        if (isGameOver) return;
+        this.isLassoActive = active;
     }
 
-    public void updateMousePosition(int x, int y) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        this.mousePosition.setLocation(x, y); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public void updateMousePosition(int x, int y) {
+        this.mousePosition.setLocation(x, y);
     }
 
-    private void spawnEntity() { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (isGameOver) return; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    private void spawnEntity() {
+        if (isGameOver) return;
 
-        long currentTime = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (currentTime - lastSpawnTime > SPAWN_INTERVAL) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            boolean spawnOrc = random.nextBoolean(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            boolean useTopLane = random.nextBoolean(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSpawnTime > SPAWN_INTERVAL) {
+            boolean spawnOrc = random.nextBoolean();
+            boolean useTopLane = random.nextBoolean();
 
-            int spawnY = useTopLane ? TOP_LANE_Y : BOTTOM_LANE_Y; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            int initialVelocity; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            int spawnX; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            int spawnY = useTopLane ? TOP_LANE_Y : BOTTOM_LANE_Y;
+            int initialVelocity;
+            int spawnX;
 
-            if (spawnOrc) { // Jika Orc // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                initialVelocity = useTopLane ? -ORC_SPEED : ORC_SPEED; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (spawnOrc) { // Jika Orc
+                initialVelocity = useTopLane ? -ORC_SPEED : ORC_SPEED;
             } else { // Jika Koin
-                initialVelocity = useTopLane ? -COIN_SPEED : COIN_SPEED; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+                initialVelocity = useTopLane ? -COIN_SPEED : COIN_SPEED;
             }
 
-            if (useTopLane) { // Bergerak ke kiri (muncul dari kanan) // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                spawnX = gamePanelWidth + 10; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } else { // Bergerak ke kanan (muncul dari kiri) // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                if (spawnOrc) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    int orcWidth = (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50) * SCALE_FACTOR_ENEMY; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    spawnX = -10 - orcWidth; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (useTopLane) { // Bergerak ke kiri (muncul dari kanan)
+                spawnX = gamePanelWidth + 10;
+            } else { // Bergerak ke kanan (muncul dari kiri)
+                if (spawnOrc) {
+                    int orcWidth = (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50) * SCALE_FACTOR_ENEMY;
+                    spawnX = -10 - orcWidth;
                 } else {
-                    int coinWidth = 30 * SCALE_FACTOR_ENEMY / 2; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    spawnX = -10 - coinWidth; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+                    int coinWidth = 30 * SCALE_FACTOR_ENEMY / 2;
+                    spawnX = -10 - coinWidth;
                 }
             }
 
-
-            if (spawnOrc) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                int originalOrcFrameWidth = fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                int totalOrcFrames = 6; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                Orc newOrc = new Orc( // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        spawnX, spawnY, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        originalOrcFrameWidth * SCALE_FACTOR_ENEMY, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getHeight() : 50) * SCALE_FACTOR_ENEMY, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        fullSpriteSheetOrc, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        initialVelocity, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        originalOrcFrameWidth, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        totalOrcFrames // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (spawnOrc) {
+                int originalOrcFrameWidth = fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50;
+                int totalOrcFrames = 6;
+                Orc newOrc = new Orc(
+                        spawnX, spawnY,
+                        originalOrcFrameWidth * SCALE_FACTOR_ENEMY,
+                        (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getHeight() : 50) * SCALE_FACTOR_ENEMY,
+                        fullSpriteSheetOrc,
+                        initialVelocity,
+                        originalOrcFrameWidth,
+                        totalOrcFrames
                 );
-                orcs.add(newOrc); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Orc baru muncul di jalur " + (useTopLane ? "atas" : "bawah") + " dengan kecepatan " + initialVelocity); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+                orcs.add(newOrc);
+                System.out.println("Orc baru muncul di jalur " + (useTopLane ? "atas" : "bawah") + " dengan kecepatan " + initialVelocity);
             } else {
-                int coinDisplayWidth = 30 * SCALE_FACTOR_ENEMY / 2; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                int coinDisplayHeight = 30 * SCALE_FACTOR_ENEMY / 2; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                Coin newCoin = new Coin( // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        spawnX, spawnY, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        coinDisplayWidth, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        coinDisplayHeight, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        coinImage, // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                        initialVelocity // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+                int coinDisplayWidth = 30 * SCALE_FACTOR_ENEMY / 2;
+                int coinDisplayHeight = 30 * SCALE_FACTOR_ENEMY / 2;
+                Coin newCoin = new Coin(
+                        spawnX, spawnY,
+                        coinDisplayWidth,
+                        coinDisplayHeight,
+                        coinImage,
+                        initialVelocity
                 );
-                coins.add(newCoin); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Coin baru muncul di jalur " + (useTopLane ? "atas" : "bawah") + " dengan kecepatan " + initialVelocity); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+                coins.add(newCoin);
+                System.out.println("Coin baru muncul di jalur " + (useTopLane ? "atas" : "bawah") + " dengan kecepatan " + initialVelocity);
             }
-            lastSpawnTime = currentTime; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            lastSpawnTime = currentTime;
         }
     }
 
-    private void checkLassoCollision() { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (isGameOver) return; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    private void checkLassoCollision() {
+        if (isGameOver) return;
 
-        Iterator<Orc> orcIterator = orcs.iterator(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        while (orcIterator.hasNext()) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            Orc orc = orcIterator.next(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            int orcCenterX = orc.getPosX() + orc.getDisplayWidth() / 2; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            int orcCenterY = orc.getPosY() + orc.getDisplayHeight() / 2; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            double distanceToOrc = Math.sqrt(Math.pow(orcCenterX - (player.getPosX() + player.getDisplayWidth() / 2), 2) + Math.pow(orcCenterY - (player.getPosY() + player.getDisplayHeight() / 2), 2)); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            double distanceMouseToOrc = mousePosition.distance(orcCenterX, orcCenterY); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        Iterator<Orc> orcIterator = orcs.iterator();
+        while (orcIterator.hasNext()) {
+            Orc orc = orcIterator.next();
+            int orcCenterX = orc.getPosX() + orc.getDisplayWidth() / 2;
+            int orcCenterY = orc.getPosY() + orc.getDisplayHeight() / 2;
+            double distanceToOrc = Math.sqrt(Math.pow(orcCenterX - (player.getPosX() + player.getDisplayWidth() / 2), 2) + Math.pow(orcCenterY - (player.getPosY() + player.getDisplayHeight() / 2), 2));
+            double distanceMouseToOrc = mousePosition.distance(orcCenterX, orcCenterY);
 
-            if (distanceToOrc < LASSO_RANGE && distanceMouseToOrc < LASSO_GRAB_TOLERANCE) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                score -= 100; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                orcIterator.remove(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                isPlayerHurt = true; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                hurtStartTime = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                lastFrameTimePlayerHurt = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                currentFramePlayerHurt = 1; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Player menangkap Orc! Status berubah menjadi hurt untuk " + (HURT_DURATION/1000.0) + " detik. Skor: " + score); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (distanceToOrc < LASSO_RANGE && distanceMouseToOrc < LASSO_GRAB_TOLERANCE) {
+                score -= 100;
+                orcIterator.remove();
+                isPlayerHurt = true;
+                hurtStartTime = System.currentTimeMillis();
+                lastFrameTimePlayerHurt = System.currentTimeMillis();
+                currentFramePlayerHurt = 1;
+                System.out.println("Player menangkap Orc! Status berubah menjadi hurt untuk " + (HURT_DURATION/1000.0) + " detik. Skor: " + score);
             }
         }
 
-        Iterator<Coin> coinIterator = coins.iterator(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        while (coinIterator.hasNext()) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            Coin coin = coinIterator.next(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            if (coin.isCollected()) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                continue; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        Iterator<Coin> coinIterator = coins.iterator();
+        while (coinIterator.hasNext()) {
+            Coin coin = coinIterator.next();
+            if (coin.isCollected()) {
+                continue;
             }
 
-            int coinCenterX = coin.getPosX() + coin.getDisplayWidth() / 2; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            int coinCenterY = coin.getPosY() + coin.getDisplayHeight() / 2; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            double distanceToCoin = Math.sqrt(Math.pow(coinCenterX - (player.getPosX() + player.getDisplayWidth() / 2), 2) + Math.pow(coinCenterY - (player.getPosY() + player.getDisplayHeight() / 2), 2)); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            double distanceMouseToCoin = mousePosition.distance(coinCenterX, coinCenterY); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            int coinCenterX = coin.getPosX() + coin.getDisplayWidth() / 2;
+            int coinCenterY = coin.getPosY() + coin.getDisplayHeight() / 2;
+            double distanceToCoin = Math.sqrt(Math.pow(coinCenterX - (player.getPosX() + player.getDisplayWidth() / 2), 2) + Math.pow(coinCenterY - (player.getPosY() + player.getDisplayHeight() / 2), 2));
+            double distanceMouseToCoin = mousePosition.distance(coinCenterX, coinCenterY);
 
-            if (distanceToCoin < LASSO_RANGE && distanceMouseToCoin < LASSO_GRAB_TOLERANCE) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                coin.setCollected(true); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                coin.setTargetX(chestPosX + chestDisplayWidth / 2 - coin.getDisplayWidth() / 2); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                coin.setTargetY(chestPosY + chestDisplayHeight / 2 - coin.getDisplayHeight() / 2); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                coin.setVelocityX(0); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Player menangkap Coin! Skor: " + score); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (distanceToCoin < LASSO_RANGE && distanceMouseToCoin < LASSO_GRAB_TOLERANCE) {
+                coin.setCollected(true);
+                coin.setTargetX(chestPosX + chestDisplayWidth / 2 - coin.getDisplayWidth() / 2);
+                coin.setTargetY(chestPosY + chestDisplayHeight / 2 - coin.getDisplayHeight() / 2);
+                coin.setVelocityX(0);
+                System.out.println("Player menangkap Coin! Skor: " + score);
             }
         }
     }
 
-    public void updateGame() { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (isGameOver) return; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public void updateGame() {
+        if (isGameOver) return;
 
-        if (System.currentTimeMillis() - gameStartTime >= GAME_DURATION) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            isGameOver = true; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            System.out.println("Game Over! Waktu Habis. Skor Akhir: " + score); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            saveGameResult(score, coinsCollectedCount); // MODIFIED: Pass score and coinsCollectedCount
-            return; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        if (System.currentTimeMillis() - gameStartTime >= GAME_DURATION) {
+            isGameOver = true;
+            System.out.println("Game Over! Waktu Habis. Skor Akhir: " + score);
+            // saveGameResult(score, coinsCollectedCount); // Ini akan dipanggil dari setGameOver()
         }
 
-        spawnEntity(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        spawnEntity();
 
-        if (isPlayerHurt) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            long currentTime = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            if (currentTime - hurtStartTime >= HURT_DURATION) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                isPlayerHurt = false; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                System.out.println("Player kembali normal dari status hurt."); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        if (isPlayerHurt) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - hurtStartTime >= HURT_DURATION) {
+                isPlayerHurt = false;
+                System.out.println("Player kembali normal dari status hurt.");
             } else {
-                if (currentTime - lastFrameTimePlayerHurt > FRAME_DELAY_PLAYER_HURT) { // FIX: Changed to FRAME_DELAY_PLAYER_HURT (uppercase HURT)
+                if (currentTime - lastFrameTimePlayerHurt > FRAME_DELAY_PLAYER_HURT) {
                     currentFramePlayerHurt = (currentFramePlayerHurt == 1) ? 2 : 1;
                     lastFrameTimePlayerHurt = currentTime;
                 }
             }
         }
 
-        player.setPosX(player.getPosX() + player.getVelocityX()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        player.setPosY(player.getPosY() + player.getVelocityY()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        player.setPosX(player.getPosX() + player.getVelocityX());
+        player.setPosY(player.getPosY() + player.getVelocityY());
 
-        Iterator<Orc> orcIterator = orcs.iterator(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        while (orcIterator.hasNext()) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            Orc orc = orcIterator.next(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            orc.setPosX(orc.getPosX() + orc.getVelocityX()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        Iterator<Orc> orcIterator = orcs.iterator();
+        while (orcIterator.hasNext()) {
+            Orc orc = orcIterator.next();
+            orc.setPosX(orc.getPosX() + orc.getVelocityX());
 
-            if (orc.getVelocityX() < 0 && orc.getPosX() + orc.getDisplayWidth() < 0) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                orcIterator.remove(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            } else if (orc.getVelocityX() > 0 && orc.getPosX() > gamePanelWidth) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                orcIterator.remove(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            if (orc.getVelocityX() < 0 && orc.getPosX() + orc.getDisplayWidth() < 0) {
+                orcIterator.remove();
+            } else if (orc.getVelocityX() > 0 && orc.getPosX() > gamePanelWidth) {
+                orcIterator.remove();
             }
 
-            long currentTime = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            if (currentTime - orc.getLastFrameTime() > orc.getFrameDelay()) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                orc.setCurrentFrame((orc.getCurrentFrame() + 1) % orc.getTotalFrames()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                orc.setLastFrameTime(currentTime); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - orc.getLastFrameTime() > orc.getFrameDelay()) {
+                orc.setCurrentFrame((orc.getCurrentFrame() + 1) % orc.getTotalFrames());
+                orc.setLastFrameTime(currentTime);
             }
         }
 
-        Iterator<Coin> coinIterator = coins.iterator(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        while (coinIterator.hasNext()) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            Coin coin = coinIterator.next(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            if (coin.isCollected()) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                int dx = coin.getTargetX() - coin.getPosX(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                int dy = coin.getTargetY() - coin.getPosY(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                double distance = Math.sqrt(dx * dx + dy * dy); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        Iterator<Coin> coinIterator = coins.iterator();
+        while (coinIterator.hasNext()) {
+            Coin coin = coinIterator.next();
+            if (coin.isCollected()) {
+                continue;
+            }
 
-                if (distance < COIN_COLLECT_SPEED) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    coin.setPosX(coin.getTargetX()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    coin.setPosY(coin.getTargetY()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    coinIterator.remove(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    score += 50; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    coinsCollectedCount++; // NEW: Increment collected coins count
-                } else {
-                    coin.setPosX(coin.getPosX() + (int)(dx / distance * COIN_COLLECT_SPEED)); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    coin.setPosY(coin.getPosY() + (int)(dy / distance * COIN_COLLECT_SPEED)); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                }
+            int dx = coin.getTargetX() - coin.getPosX();
+            int dy = coin.getTargetY() - coin.getPosY();
+            double distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < COIN_COLLECT_SPEED) {
+                coin.setPosX(coin.getTargetX());
+                coin.setPosY(coin.getTargetY());
+                coinIterator.remove();
+                score += 50;
+                coinsCollectedCount++;
             } else {
-                coin.setPosX(coin.getPosX() + coin.getVelocityX()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                if (coin.getVelocityX() < 0 && coin.getPosX() + coin.getDisplayWidth() < 0) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    coinIterator.remove(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                } else if (coin.getVelocityX() > 0 && coin.getPosX() > gamePanelWidth) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                    coinIterator.remove(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                }
+                coin.setPosX(coin.getPosX() + (int)(dx / distance * COIN_COLLECT_SPEED));
+                coin.setPosY(coin.getPosY() + (int)(dy / distance * COIN_COLLECT_SPEED));
             }
         }
 
-        long currentTime = System.currentTimeMillis(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        if (currentTime - lastFrameTimePlayer > FRAME_DELAY_PLAYER) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            if (player.getVelocityX() != 0 || player.getVelocityY() != 0) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-                currentFramePlayer = (currentFramePlayer + 1) % totalFramesPlayer; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastFrameTimePlayer > FRAME_DELAY_PLAYER) {
+            if (player.getVelocityX() != 0 || player.getVelocityY() != 0) {
+                currentFramePlayer = (currentFramePlayer + 1) % totalFramesPlayer;
             }
-            lastFrameTimePlayer = currentTime; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            lastFrameTimePlayer = currentTime;
         }
 
-        if (isLassoActive) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            checkLassoCollision(); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        if (isLassoActive) {
+            checkLassoCollision();
         }
     }
 
-    // MODIFIED: saveGameResult instead of saveScore
+    // Metode untuk menyimpan hasil game ke database
     private void saveGameResult(int skor, int count) {
-        String queryCheck = "SELECT COUNT(*) FROM thasil WHERE username = '" + this.playerName + "'";
+        String queryCheck = "SELECT skor, count FROM thasil WHERE username = '" + this.playerName + "'";
         try (ResultSet rs = db.selectQuery(queryCheck)) {
-            if (rs.next() && rs.getInt(1) > 0) {
-                // Username exists, update skor and count
-                String sql = "UPDATE thasil SET skor = skor + " + skor + ", count = count + " + count + " WHERE username = '" + this.playerName + "'";
-                db.insertUpdateDeleteQuery(sql);
-                System.out.println("Skor " + skor + " dan Count " + count + " berhasil diupdate untuk " + playerName);
+            if (rs.next()) {
+                // Username sudah ada, cek apakah skor baru lebih tinggi
+                int existingScore = rs.getInt("skor");
+                int existingCount = rs.getInt("count");
+
+                if (skor > existingScore) {
+                    // Jika skor baru lebih tinggi, update skor dan count
+                    String sql = "UPDATE thasil SET skor = " + skor + ", count = " + count + " WHERE username = '" + this.playerName + "'";
+                    db.insertUpdateDeleteQuery(sql);
+                    System.out.println("Skor " + skor + " dan Count " + count + " berhasil diupdate untuk " + playerName + " (skor lebih tinggi).");
+                } else {
+                    System.out.println("Skor baru (" + skor + ") untuk " + playerName + " tidak lebih tinggi dari skor yang sudah ada (" + existingScore + "). Tidak ada update.");
+                }
             } else {
-                // Username does not exist, insert new record
+                // Username belum ada, masukkan rekor baru
                 String sql = "INSERT INTO thasil (username, skor, count) VALUES ('" + this.playerName + "', " + skor + ", " + count + ")";
                 db.insertUpdateDeleteQuery(sql);
-                System.out.println("Skor " + skor + " dan Count " + count + " berhasil disimpan untuk " + playerName);
+                System.out.println("Skor " + skor + " dan Count " + count + " berhasil disimpan untuk " + playerName + " (rekor baru).");
             }
         } catch (SQLException | RuntimeException e) {
             System.err.println("Gagal menyimpan/mengupdate skor dan count: " + e.getMessage());
         }
     }
 
-
-    // MODIFIED: Get high scores with count
+    // Metode untuk mengambil highscores dari database
     public List<String[]> getHighScores() {
         List<String[]> highScores = new ArrayList<>();
-        // Changed table name to 'thasil' and column names to 'skor' and 'count'
-        String sql = "SELECT username, skor, count FROM thasil ORDER BY skor DESC LIMIT 5";
+        // Mengambil semua data dan mengurutkan berdasarkan skor tertinggi
+        String sql = "SELECT username, skor, count FROM thasil ORDER BY skor DESC";
         try (ResultSet rs = db.selectQuery(sql)) {
             while (rs.next()) {
                 String username = rs.getString("username");
@@ -498,31 +505,31 @@ public class GameViewModel {
                 highScores.add(new String[]{username, String.valueOf(skor), String.valueOf(count)});
             }
         } catch (SQLException e) {
-            System.err.println("Gagal mengambil highscores: " + e.getMessage()); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            System.err.println("Gagal mengambil highscores: " + e.getMessage());
         }
         return highScores;
     }
 
-    public Image getCurrentPlayerFrame() { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        BufferedImage currentSpriteSheet; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        int frameToUse = 0; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        int frameWidth = originalFrameWidthPlayer; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        int frameHeight = originalFrameHeightPlayer; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+    public Image getCurrentPlayerFrame() {
+        BufferedImage currentSpriteSheet;
+        int frameToUse = 0;
+        int frameWidth = originalFrameWidthPlayer;
+        int frameHeight = originalFrameHeightPlayer; // <-- Sudah diperbaiki di sini
 
-        if (isPlayerHurt && fullSpriteSheetPlayerHurt != null) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            currentSpriteSheet = fullSpriteSheetPlayerHurt; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            frameToUse = currentFramePlayerHurt; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        if (isPlayerHurt && fullSpriteSheetPlayerHurt != null) {
+            currentSpriteSheet = fullSpriteSheetPlayerHurt;
+            frameToUse = currentFramePlayerHurt;
         } else {
-            currentSpriteSheet = fullSpriteSheetPlayer; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            frameToUse = currentFramePlayer; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+            currentSpriteSheet = fullSpriteSheetPlayer;
+            frameToUse = currentFramePlayer;
         }
 
-        if (currentSpriteSheet == null || frameWidth == 0 || frameHeight == 0) { // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-            return null; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        if (currentSpriteSheet == null || frameWidth == 0 || frameHeight == 0) {
+            return null;
         }
 
-        int sourceX = frameToUse * frameWidth; // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
-        return currentSpriteSheet.getSubimage(sourceX, 0, frameWidth, frameHeight); // cite: sif4imnurul/treasure_game/treasure_game-34ce5aec9cbe85cae6c5a94791c2845928cf197f/src/viewmodel/GameViewModel.java
+        int sourceX = frameToUse * frameWidth;
+        return currentSpriteSheet.getSubimage(sourceX, 0, frameWidth, frameHeight);
     }
 
     public Image getBackgroundImage() {
@@ -543,7 +550,7 @@ public class GameViewModel {
     public int getLassoRange() { return LASSO_RANGE; }
 
     public int getScore() { return score; }
-    public int getCoinsCollectedCount() { return coinsCollectedCount; } // NEW: Getter for coins collected count
+    public int getCoinsCollectedCount() { return coinsCollectedCount; }
 
     public Image getChestOpenImage() { return chestOpenImage; }
     public int getChestPosX() { return chestPosX; }
