@@ -3,7 +3,7 @@ package view;
 import model.Player;
 import viewmodel.GameViewModel;
 import model.Orc;
-import model.Coin;
+import model.Treasure; // Changed from Coin to Treasure
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -115,6 +115,7 @@ public class GameView extends JPanel implements ActionListener {
         int playerVelocityX = viewModel.getPlayerVelocityX();
 
         if (currentPlayerFrame != null) {
+            // Flip image horizontally if player is moving left
             if (playerVelocityX < 0) {
                 g.drawImage(currentPlayerFrame, playerX + playerDisplayWidth, playerY, -playerDisplayWidth, playerDisplayHeight, this);
             } else {
@@ -127,12 +128,14 @@ public class GameView extends JPanel implements ActionListener {
             Image orcFrame = null;
             if (orc.getFullSpriteSheet() != null && orc.getOriginalFrameWidth() != 0) {
                 int sourceX = orc.getCurrentFrame() * orc.getOriginalFrameWidth();
+                // Ensure the subimage selection is within bounds
                 if (sourceX + orc.getOriginalFrameWidth() <= orc.getFullSpriteSheet().getWidth()) {
                     orcFrame = orc.getFullSpriteSheet().getSubimage(sourceX, 0, orc.getOriginalFrameWidth(), orc.getFullSpriteSheet().getHeight());
                 }
             }
 
             if (orcFrame != null) {
+                // Flip image horizontally if orc is moving left
                 if (orc.getVelocityX() < 0) {
                     g.drawImage(orcFrame, orc.getPosX() + orc.getDisplayWidth(), orc.getPosY(), -orc.getDisplayWidth(), orc.getDisplayHeight(), this);
                 } else {
@@ -144,21 +147,22 @@ public class GameView extends JPanel implements ActionListener {
             }
         }
 
-        List<Coin> coins = viewModel.getCoins();
-        for (Coin coin : coins) {
-            Image coinImage = coin.getImage();
-            if (coinImage != null) {
-                g.drawImage(coinImage, coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight(), this);
+        // Draw Treasures (formerly Coins)
+        List<Treasure> treasures = viewModel.getTreasures(); // Changed from getCoins()
+        for (Treasure treasure : treasures) { // Changed from Coin
+            Image treasureImage = treasure.getImage();
+            if (treasureImage != null) {
+                g.drawImage(treasureImage, treasure.getPosX(), treasure.getPosY(), treasure.getDisplayWidth(), treasure.getDisplayHeight(), this);
             } else {
                 g.setColor(Color.YELLOW);
-                g.fillRect(coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight());
+                g.fillRect(treasure.getPosX(), treasure.getPosY(), treasure.getDisplayWidth(), treasure.getDisplayHeight());
             }
         }
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 24));
         g.drawString("Score: " + viewModel.getScore(), 10, 30);
-        g.drawString("Coins: " + viewModel.getCoinsCollectedCount(), 10, 90);
+        g.drawString("Harta Karun Terkumpul: " + viewModel.getTreasuresCollectedCount(), 10, 60);
 
         long timeLeftMillis = viewModel.getTimeLeft();
         long secondsLeft = timeLeftMillis / 1000;
@@ -195,22 +199,10 @@ public class GameView extends JPanel implements ActionListener {
             int mouseX = viewModel.getMousePosition().x;
             int mouseY = viewModel.getMousePosition().y;
 
-            double distanceToMouse = Math.sqrt(Math.pow(mouseX - playerCenterX, 2) + Math.pow(mouseY - playerCenterY, 2));
-            int lassoRange = viewModel.getLassoRange();
-            int endX, endY;
-
-            if (distanceToMouse > lassoRange) {
-                double ratio = lassoRange / distanceToMouse;
-                endX = playerCenterX + (int)((mouseX - playerCenterX) * ratio);
-                endY = playerCenterY + (int)((mouseY - playerCenterY) * ratio);
-            } else {
-                endX = mouseX;
-                endY = mouseY;
-            }
-
+            // Lasso now extends to the mouse position directly
             g.setColor(Color.WHITE);
-            g.drawLine(playerCenterX, playerCenterY, endX, endY);
-            g.fillOval(endX - 5, endY - 5, 10, 10);
+            g.drawLine(playerCenterX, playerCenterY, mouseX, mouseY);
+            g.fillOval(mouseX - 5, mouseY - 5, 10, 10); // A dot at the end of the lasso
         }
     }
 
