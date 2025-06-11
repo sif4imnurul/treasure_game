@@ -1,5 +1,3 @@
-// package viewmodel;
-// File: viewmodel/GameViewModel.java
 package viewmodel;
 
 import model.Player;
@@ -16,20 +14,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Random;
 
 public class GameViewModel {
     private Player player;
-    private Orc singleOrc;
+    private List<Orc> orcs;
     private List<Coin> coins;
-    private final int PLAYER_SPEED = 5;
-    private final int ENEMY_SPEED = 2;
-    private final int COIN_COUNT = 5;
+    private final int PLAYER_SPEED = 7; // Kecepatan pemain dipercepat sedikit dari 5 menjadi 7
+    private final int ORC_SPEED = 6;   // Kecepatan Orc (lebih cepat dari koin)
+    private final int COIN_SPEED = 4;  // Kecepatan Koin (lebih lambat dari orc)
+    private final int SPAWN_INTERVAL = 1500;
+    private long lastSpawnTime;
 
     private int gamePanelWidth;
     private int gamePanelHeight;
 
     private BufferedImage fullSpriteSheetPlayer;
-    private BufferedImage fullSpriteSheetPlayerHurt; // Sprite sheet untuk soldier-hurt
+    private BufferedImage fullSpriteSheetPlayerHurt;
     private BufferedImage fullSpriteSheetOrc;
     private BufferedImage coinImage;
     private BufferedImage backgroundImage;
@@ -47,13 +48,13 @@ public class GameViewModel {
     private long lastFrameTimePlayer;
     private final long FRAME_DELAY_PLAYER = 70;
 
-    private boolean isPlayerHurt = false; // Status apakah player sedang hurt
-    private long hurtStartTime = 0; // Waktu mulai hurt
-    private final long HURT_DURATION = 1000; // Durasi hurt dalam milliseconds (1 detik)
+    private boolean isPlayerHurt = false;
+    private long hurtStartTime = 0;
+    private final long HURT_DURATION = 1000;
 
-    private int currentFramePlayerHurt = 1; // Frame hurt dimulai dari frame 1 (frame ke-2)
+    private int currentFramePlayerHurt = 1;
     private long lastFrameTimePlayerHurt;
-    private final long FRAME_DELAY_PLAYER_HURT = 250; // Delay antar frame hurt (0.25 detik)
+    private final long FRAME_DELAY_PLAYER_HURT = 250;
 
     private final int SCALE_FACTOR_PLAYER = 5;
     private final int SCALE_FACTOR_ENEMY = 3;
@@ -62,15 +63,26 @@ public class GameViewModel {
     private Point mousePosition;
     private final int LASSO_RANGE = 200;
     private final int LASSO_GRAB_TOLERANCE = 30;
-    private final int COIN_COLLECT_SPEED = 10; // Speed at which coin moves to chest
+    private final int COIN_COLLECT_SPEED = 10;
 
     private int score = 0;
+
+    private long gameStartTime;
+    private final long GAME_DURATION = 30 * 1000;
+    private boolean isGameOver = false;
+
+    private final int TOP_LANE_Y;
+    private final int BOTTOM_LANE_Y;
+    private Random random;
 
     public GameViewModel(int panelWidth, int panelHeight) {
         this.gamePanelWidth = panelWidth;
         this.gamePanelHeight = panelHeight;
+        this.random = new Random();
 
-        // Memuat sprite sheet pemain
+        TOP_LANE_Y = (int) (gamePanelHeight * 0.25);
+        BOTTOM_LANE_Y = (int) (gamePanelHeight * 0.75);
+
         URL playerImageUrl = getClass().getClassLoader().getResource("assets/soldier-walk.png");
         if (playerImageUrl != null) {
             try {
@@ -88,7 +100,6 @@ public class GameViewModel {
             fullSpriteSheetPlayer = null;
         }
 
-        // Memuat sprite sheet pemain hurt
         URL playerHurtImageUrl = getClass().getClassLoader().getResource("assets/soldier-hurt.png");
         if (playerHurtImageUrl != null) {
             try {
@@ -103,13 +114,13 @@ public class GameViewModel {
             fullSpriteSheetPlayerHurt = null;
         }
 
-        // Memuat gambar latar belakang (background-cave.png)
         URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background-cave.png");
         if (backgroundImageUrl != null) {
             try {
                 backgroundImage = ImageIO.read(backgroundImageUrl);
                 System.out.println("Gambar latar belakang berhasil dimuat: " + backgroundImageUrl);
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 System.err.println("ERROR: Gagal memuat gambar latar belakang: " + e.getMessage());
                 backgroundImage = null;
             }
@@ -118,7 +129,6 @@ public class GameViewModel {
             backgroundImage = null;
         }
 
-        // Memuat sprite sheet Orc (orc-attack.png)
         URL orcImageUrl = getClass().getClassLoader().getResource("assets/orc-attack.png");
         if (orcImageUrl != null) {
             try {
@@ -133,7 +143,6 @@ public class GameViewModel {
             fullSpriteSheetOrc = null;
         }
 
-        // Memuat gambar Coin (coin.png)
         URL coinImageUrl = getClass().getClassLoader().getResource("assets/coin.png");
         if (coinImageUrl != null) {
             try {
@@ -148,7 +157,6 @@ public class GameViewModel {
             coinImage = null;
         }
 
-        // Memuat gambar Peti Terbuka (chest-open.png)
         URL chestImageUrl = getClass().getClassLoader().getResource("assets/chest-open.png");
         if (chestImageUrl != null) {
             try {
@@ -163,7 +171,6 @@ public class GameViewModel {
             chestOpenImage = null;
         }
 
-        // Inisialisasi Player
         int playerDisplayWidth = originalFrameWidthPlayer * SCALE_FACTOR_PLAYER;
         int playerDisplayHeight = originalFrameHeightPlayer * SCALE_FACTOR_PLAYER;
 
@@ -175,51 +182,24 @@ public class GameViewModel {
                 fullSpriteSheetPlayer
         );
 
-        // Inisialisasi SATU Orc
-        int originalOrcFrameWidth = fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50;
-        int totalOrcFrames = 6;
+        orcs = new ArrayList<>();
+        coins = new ArrayList<>();
 
-        singleOrc = new Orc(
-                gamePanelWidth - (originalOrcFrameWidth * SCALE_FACTOR_ENEMY), 100,
-                originalOrcFrameWidth * SCALE_FACTOR_ENEMY,
-                (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getHeight() : 50) * SCALE_FACTOR_ENEMY,
-                fullSpriteSheetOrc,
-                -ENEMY_SPEED,
-                originalOrcFrameWidth,
-                totalOrcFrames
-        );
-
-        // Inisialisasi posisi dan ukuran Peti Harta Karun
         chestDisplayWidth = 100;
         chestDisplayHeight = 100;
         chestPosX = 10;
-        chestPosY = 30 + 10; // Y di bawah skor + sedikit padding
-
-        // Inisialisasi Coins
-        coins = new ArrayList<>();
-        int coinDisplayWidth = 30 * SCALE_FACTOR_ENEMY / 2;
-        int coinDisplayHeight = 30 * SCALE_FACTOR_ENEMY / 2;
-
-        for (int i = 0; i < COIN_COUNT; i++) {
-            int randomX = (int)(Math.random() * (gamePanelWidth - coinDisplayWidth));
-            int randomY = (int)(gamePanelHeight * 0.7 + (Math.random() * (gamePanelHeight * 0.2)));
-            int initialVelocity = (i % 2 == 0) ? ENEMY_SPEED : -ENEMY_SPEED;
-
-            coins.add(new Coin(
-                    randomX,
-                    randomY,
-                    coinDisplayWidth,
-                    coinDisplayHeight,
-                    coinImage,
-                    initialVelocity
-            ));
-        }
+        chestPosY = 30 + 10 + 30;
 
         lastFrameTimePlayer = System.currentTimeMillis();
         mousePosition = new Point(0,0);
+
+        this.gameStartTime = System.currentTimeMillis();
+        this.lastSpawnTime = System.currentTimeMillis();
     }
 
     public void setPlayerMovementDirection(int keyCode, boolean isPressed) {
+        if (isGameOver) return;
+
         if (isPressed) {
             if (keyCode == KeyEvent.VK_LEFT) {
                 player.setVelocityX(-PLAYER_SPEED);
@@ -244,6 +224,7 @@ public class GameViewModel {
     }
 
     public void setLassoActive(boolean active) {
+        if (isGameOver) return;
         this.isLassoActive = active;
     }
 
@@ -251,30 +232,95 @@ public class GameViewModel {
         this.mousePosition.setLocation(x, y);
     }
 
+    private void spawnEntity() {
+        if (isGameOver) return;
+
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSpawnTime > SPAWN_INTERVAL) {
+            boolean spawnOrc = random.nextBoolean();
+            boolean useTopLane = random.nextBoolean();
+
+            int spawnY = useTopLane ? TOP_LANE_Y : BOTTOM_LANE_Y;
+            int initialVelocity;
+            int spawnX;
+
+            if (spawnOrc) { // Jika Orc
+                initialVelocity = useTopLane ? -ORC_SPEED : ORC_SPEED; // Gunakan ORC_SPEED
+            } else { // Jika Koin
+                initialVelocity = useTopLane ? -COIN_SPEED : COIN_SPEED; // Gunakan COIN_SPEED
+            }
+
+            if (useTopLane) { // Bergerak ke kiri (muncul dari kanan)
+                spawnX = gamePanelWidth + 10;
+            } else { // Bergerak ke kanan (muncul dari kiri)
+                // Sesuaikan spawnX berdasarkan jenis entitas untuk memastikan jarak yang konsisten
+                if (spawnOrc) {
+                    int orcWidth = (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50) * SCALE_FACTOR_ENEMY;
+                    spawnX = -10 - orcWidth;
+                } else {
+                    int coinWidth = 30 * SCALE_FACTOR_ENEMY / 2;
+                    spawnX = -10 - coinWidth;
+                }
+            }
+
+
+            if (spawnOrc) {
+                int originalOrcFrameWidth = fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50;
+                int totalOrcFrames = 6;
+                Orc newOrc = new Orc(
+                        spawnX, spawnY,
+                        originalOrcFrameWidth * SCALE_FACTOR_ENEMY,
+                        (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getHeight() : 50) * SCALE_FACTOR_ENEMY,
+                        fullSpriteSheetOrc,
+                        initialVelocity, // Gunakan initialVelocity yang sudah disesuaikan
+                        originalOrcFrameWidth,
+                        totalOrcFrames
+                );
+                orcs.add(newOrc);
+                System.out.println("Orc baru muncul di jalur " + (useTopLane ? "atas" : "bawah") + " dengan kecepatan " + initialVelocity);
+            } else {
+                int coinDisplayWidth = 30 * SCALE_FACTOR_ENEMY / 2;
+                int coinDisplayHeight = 30 * SCALE_FACTOR_ENEMY / 2;
+                Coin newCoin = new Coin(
+                        spawnX, spawnY,
+                        coinDisplayWidth,
+                        coinDisplayHeight,
+                        coinImage,
+                        initialVelocity // Gunakan initialVelocity yang sudah disesuaikan
+                );
+                coins.add(newCoin);
+                System.out.println("Coin baru muncul di jalur " + (useTopLane ? "atas" : "bawah") + " dengan kecepatan " + initialVelocity);
+            }
+            lastSpawnTime = currentTime;
+        }
+    }
+
     private void checkLassoCollision() {
-        // Cek Orc
-        if (singleOrc != null) {
-            int orcCenterX = singleOrc.getPosX() + singleOrc.getDisplayWidth() / 2;
-            int orcCenterY = singleOrc.getPosY() + singleOrc.getDisplayHeight() / 2;
+        if (isGameOver) return;
+
+        Iterator<Orc> orcIterator = orcs.iterator();
+        while (orcIterator.hasNext()) {
+            Orc orc = orcIterator.next();
+            int orcCenterX = orc.getPosX() + orc.getDisplayWidth() / 2;
+            int orcCenterY = orc.getPosY() + orc.getDisplayHeight() / 2;
             double distanceToOrc = Math.sqrt(Math.pow(orcCenterX - (player.getPosX() + player.getDisplayWidth() / 2), 2) + Math.pow(orcCenterY - (player.getPosY() + player.getDisplayHeight() / 2), 2));
             double distanceMouseToOrc = mousePosition.distance(orcCenterX, orcCenterY);
 
             if (distanceToOrc < LASSO_RANGE && distanceMouseToOrc < LASSO_GRAB_TOLERANCE) {
-                score += 100;
-                singleOrc = null; // Orc hilang
-                isPlayerHurt = true; // Player berubah jadi hurt setelah nangkep orc
-                hurtStartTime = System.currentTimeMillis(); // Catat waktu mulai hurt
-                lastFrameTimePlayerHurt = System.currentTimeMillis(); // Reset timer frame hurt
-                currentFramePlayerHurt = 1; // Mulai dari frame ke-2 (index 1)
-                System.out.println("Player menangkap Orc! Status berubah menjadi hurt untuk " + (HURT_DURATION/1000.0) + " detik.");
+                score -= 100;
+                orcIterator.remove();
+                isPlayerHurt = true;
+                hurtStartTime = System.currentTimeMillis();
+                lastFrameTimePlayerHurt = System.currentTimeMillis();
+                currentFramePlayerHurt = 1;
+                System.out.println("Player menangkap Orc! Status berubah menjadi hurt untuk " + (HURT_DURATION/1000.0) + " detik. Skor: " + score);
             }
         }
 
-        // Cek Coin
-        // Iterate using a standard for loop to avoid ConcurrentModificationException if removing
-        for (int i = 0; i < coins.size(); i++) {
-            Coin coin = coins.get(i);
-            if (coin.isCollected()) { // Skip if already collected and moving to chest
+        Iterator<Coin> coinIterator = coins.iterator();
+        while (coinIterator.hasNext()) {
+            Coin coin = coinIterator.next();
+            if (coin.isCollected()) {
                 continue;
             }
 
@@ -284,56 +330,65 @@ public class GameViewModel {
             double distanceMouseToCoin = mousePosition.distance(coinCenterX, coinCenterY);
 
             if (distanceToCoin < LASSO_RANGE && distanceMouseToCoin < LASSO_GRAB_TOLERANCE) {
-                score += 50;
                 coin.setCollected(true);
                 coin.setTargetX(chestPosX + chestDisplayWidth / 2 - coin.getDisplayWidth() / 2);
                 coin.setTargetY(chestPosY + chestDisplayHeight / 2 - coin.getDisplayHeight() / 2);
-                coin.setVelocityX(0); // Stop horizontal movement
+                coin.setVelocityX(0);
+                System.out.println("Player menangkap Coin! Skor: " + score);
             }
         }
     }
 
     public void updateGame() {
-        // Update status hurt player - cek apakah sudah waktunya kembali normal
+        if (isGameOver) return;
+
+        if (System.currentTimeMillis() - gameStartTime >= GAME_DURATION) {
+            isGameOver = true;
+            System.out.println("Game Over! Waktu Habis. Skor Akhir: " + score);
+            return;
+        }
+
+        spawnEntity();
+
         if (isPlayerHurt) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - hurtStartTime >= HURT_DURATION) {
                 isPlayerHurt = false;
                 System.out.println("Player kembali normal dari status hurt.");
             } else {
-                // Update animasi hurt (frame 1 dan 2, yaitu foto ke-2 dan ke-3)
                 if (currentTime - lastFrameTimePlayerHurt > FRAME_DELAY_PLAYER_HURT) {
-                    currentFramePlayerHurt = (currentFramePlayerHurt == 1) ? 2 : 1; // Toggle antara frame 1 dan 2
+                    currentFramePlayerHurt = (currentFramePlayerHurt == 1) ? 2 : 1;
                     lastFrameTimePlayerHurt = currentTime;
                 }
             }
         }
 
-        // Update posisi pemain - TIDAK ADA BATASAN LAGI!
+        // Update posisi pemain - TIDAK ADA BATASAN LAYAR
         player.setPosX(player.getPosX() + player.getVelocityX());
         player.setPosY(player.getPosY() + player.getVelocityY());
 
-        // KODE PEMBATASAN PLAYER SUDAH DIHAPUS - Player bisa bergerak bebas keluar layar
+        Iterator<Orc> orcIterator = orcs.iterator();
+        while (orcIterator.hasNext()) {
+            Orc orc = orcIterator.next();
+            orc.setPosX(orc.getPosX() + orc.getVelocityX());
 
-        // Update posisi Orc
-        if (singleOrc != null) {
-            singleOrc.setPosX(singleOrc.getPosX() + singleOrc.getVelocityX());
-            if (singleOrc.getPosX() <= 0 || singleOrc.getPosX() + singleOrc.getDisplayWidth() >= gamePanelWidth) {
-                singleOrc.setVelocityX(singleOrc.getVelocityX() * -1);
+            if (orc.getVelocityX() < 0 && orc.getPosX() + orc.getDisplayWidth() < 0) {
+                orcIterator.remove();
+            } else if (orc.getVelocityX() > 0 && orc.getPosX() > gamePanelWidth) {
+                orcIterator.remove();
             }
+
             long currentTime = System.currentTimeMillis();
-            if (currentTime - singleOrc.getLastFrameTime() > singleOrc.getFrameDelay()) {
-                singleOrc.setCurrentFrame((singleOrc.getCurrentFrame() + 1) % singleOrc.getTotalFrames());
-                singleOrc.setLastFrameTime(currentTime);
+            if (currentTime - orc.getLastFrameTime() > orc.getFrameDelay()) {
+                orc.setCurrentFrame((orc.getCurrentFrame() + 1) % orc.getTotalFrames());
+                orc.setLastFrameTime(currentTime);
             }
         }
 
-        // Update posisi Coins
         Iterator<Coin> coinIterator = coins.iterator();
         while (coinIterator.hasNext()) {
             Coin coin = coinIterator.next();
             if (coin.isCollected()) {
-                // Move coin towards the chest
                 int dx = coin.getTargetX() - coin.getPosX();
                 int dy = coin.getTargetY() - coin.getPosY();
                 double distance = Math.sqrt(dx * dx + dy * dy);
@@ -341,15 +396,18 @@ public class GameViewModel {
                 if (distance < COIN_COLLECT_SPEED) {
                     coin.setPosX(coin.getTargetX());
                     coin.setPosY(coin.getTargetY());
-                    coinIterator.remove(); // Remove coin once it reaches the chest
+                    coinIterator.remove();
+                    score += 50;
                 } else {
                     coin.setPosX(coin.getPosX() + (int)(dx / distance * COIN_COLLECT_SPEED));
                     coin.setPosY(coin.getPosY() + (int)(dy / distance * COIN_COLLECT_SPEED));
                 }
             } else {
                 coin.setPosX(coin.getPosX() + coin.getVelocityX());
-                if (coin.getPosX() <= 0 || coin.getPosX() + coin.getDisplayWidth() >= gamePanelWidth) {
-                    coin.setVelocityX(coin.getVelocityX() * -1);
+                if (coin.getVelocityX() < 0 && coin.getPosX() + coin.getDisplayWidth() < 0) {
+                    coinIterator.remove();
+                } else if (coin.getVelocityX() > 0 && coin.getPosX() > gamePanelWidth) {
+                    coinIterator.remove();
                 }
             }
         }
@@ -373,14 +431,12 @@ public class GameViewModel {
         int frameWidth = originalFrameWidthPlayer;
         int frameHeight = originalFrameHeightPlayer;
 
-        // Pilih sprite sheet berdasarkan status player
         if (isPlayerHurt && fullSpriteSheetPlayerHurt != null) {
             currentSpriteSheet = fullSpriteSheetPlayerHurt;
-            frameToUse = currentFramePlayerHurt; // Gunakan frame hurt (1 atau 2)
-            // Asumsi sprite sheet hurt memiliki struktur yang sama
+            frameToUse = currentFramePlayerHurt;
         } else {
             currentSpriteSheet = fullSpriteSheetPlayer;
-            frameToUse = currentFramePlayer; // Gunakan frame normal
+            frameToUse = currentFramePlayer;
         }
 
         if (currentSpriteSheet == null || frameWidth == 0 || frameHeight == 0) {
@@ -401,22 +457,30 @@ public class GameViewModel {
     public int getPlayerDisplayHeight() { return player.getDisplayHeight(); }
     public int getPlayerVelocityX() { return player.getVelocityX(); }
 
-    public Orc getSingleOrc() { return singleOrc; }
+    public List<Orc> getOrcs() { return orcs; }
     public List<Coin> getCoins() { return coins; }
 
     public boolean isLassoActive() { return isLassoActive; }
     public Point getMousePosition() { return mousePosition; }
-    public int getLassoRange() { return LASSO_RANGE; } // Getter untuk LASSO_RANGE
+    public int getLassoRange() { return LASSO_RANGE; }
 
     public int getScore() { return score; }
 
-    // Getters untuk Peti Harta Karun
     public Image getChestOpenImage() { return chestOpenImage; }
     public int getChestPosX() { return chestPosX; }
     public int getChestPosY() { return chestPosY; }
     public int getChestDisplayWidth() { return chestDisplayWidth; }
     public int getChestDisplayHeight() { return chestDisplayHeight; }
 
-    // Getter untuk status player hurt
     public boolean isPlayerHurt() { return isPlayerHurt; }
+
+    public long getTimeLeft() {
+        long elapsed = System.currentTimeMillis() - gameStartTime;
+        long remaining = GAME_DURATION - elapsed;
+        return Math.max(0, remaining);
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
 }

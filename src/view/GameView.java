@@ -105,25 +105,27 @@ public class GameView extends JPanel implements ActionListener {
             }
         }
 
-        // Gambar Orc tunggal (jika masih ada)
-        Orc singleOrc = viewModel.getSingleOrc();
-        if (singleOrc != null) {
-            // Logika untuk mendapatkan frame Orc saat ini
+        // Gambar Orcs
+        List<Orc> orcs = viewModel.getOrcs();
+        for (Orc orc : orcs) {
             Image orcFrame = null;
-            if (singleOrc.getFullSpriteSheet() != null && singleOrc.getOriginalFrameWidth() != 0) {
-                int sourceX = singleOrc.getCurrentFrame() * singleOrc.getOriginalFrameWidth();
-                orcFrame = singleOrc.getFullSpriteSheet().getSubimage(sourceX, 0, singleOrc.getOriginalFrameWidth(), singleOrc.getFullSpriteSheet().getHeight());
+            if (orc.getFullSpriteSheet() != null && orc.getOriginalFrameWidth() != 0) {
+                int sourceX = orc.getCurrentFrame() * orc.getOriginalFrameWidth();
+                // Pastikan tidak melebihi lebar sprite sheet
+                if (sourceX + orc.getOriginalFrameWidth() <= orc.getFullSpriteSheet().getWidth()) {
+                    orcFrame = orc.getFullSpriteSheet().getSubimage(sourceX, 0, orc.getOriginalFrameWidth(), orc.getFullSpriteSheet().getHeight());
+                }
             }
 
             if (orcFrame != null) {
-                if (singleOrc.getVelocityX() < 0) {
-                    g.drawImage(orcFrame, singleOrc.getPosX() + singleOrc.getDisplayWidth(), singleOrc.getPosY(), -singleOrc.getDisplayWidth(), singleOrc.getDisplayHeight(), this);
-                } else {
-                    g.drawImage(orcFrame, singleOrc.getPosX(), singleOrc.getPosY(), singleOrc.getDisplayWidth(), singleOrc.getDisplayHeight(), this);
+                if (orc.getVelocityX() < 0) { // Bergerak ke kiri, balik gambar
+                    g.drawImage(orcFrame, orc.getPosX() + orc.getDisplayWidth(), orc.getPosY(), -orc.getDisplayWidth(), orc.getDisplayHeight(), this);
+                } else { // Bergerak ke kanan, gambar normal
+                    g.drawImage(orcFrame, orc.getPosX(), orc.getPosY(), orc.getDisplayWidth(), orc.getDisplayHeight(), this);
                 }
             } else {
                 g.setColor(Color.RED);
-                g.fillRect(singleOrc.getPosX(), singleOrc.getPosY(), singleOrc.getDisplayWidth(), singleOrc.getDisplayHeight());
+                g.fillRect(orc.getPosX(), orc.getPosY(), orc.getDisplayWidth(), orc.getDisplayHeight());
             }
         }
 
@@ -132,7 +134,6 @@ public class GameView extends JPanel implements ActionListener {
         for (Coin coin : coins) {
             Image coinImage = coin.getImage();
             if (coinImage != null) {
-                // No need to flip coin image based on velocity, coins just move
                 g.drawImage(coinImage, coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight(), this);
             } else {
                 g.setColor(Color.YELLOW);
@@ -145,38 +146,45 @@ public class GameView extends JPanel implements ActionListener {
         g.setFont(new Font("Arial", Font.BOLD, 24));
         g.drawString("Score: " + viewModel.getScore(), 10, 30);
 
-        // Gambar peti harta karun (di bawah skor)
+        // Gambar waktu tersisa
+        long timeLeftMillis = viewModel.getTimeLeft();
+        long secondsLeft = timeLeftMillis / 1000;
+        long millisecondsLeft = timeLeftMillis % 1000;
+
+        String timeString = String.format("Time: %d.%03d", secondsLeft, millisecondsLeft);
+        if (viewModel.isGameOver()) {
+            timeString = "Time: 0.000 (Game Over!)";
+            gameLoopTimer.stop();
+        }
+        g.drawString(timeString, 10, 60);
+
+        // Gambar peti harta karun
         Image chestImage = viewModel.getChestOpenImage();
         if (chestImage != null) {
             g.drawImage(chestImage, viewModel.getChestPosX(), viewModel.getChestPosY(),
                     viewModel.getChestDisplayWidth(), viewModel.getChestDisplayHeight(), this);
         } else {
-            g.setColor(Color.BLUE); // Fallback warna jika gambar tidak ada
+            g.setColor(Color.BLUE);
             g.fillRect(viewModel.getChestPosX(), viewModel.getChestPosY(),
                     viewModel.getChestDisplayWidth(), viewModel.getChestDisplayHeight());
         }
 
-        // Gambar laso dengan panjang terbatas
+        // Gambar laso
         if (viewModel.isLassoActive()) {
             int playerCenterX = playerX + playerDisplayWidth / 2;
             int playerCenterY = playerY + playerDisplayHeight / 2;
             int mouseX = viewModel.getMousePosition().x;
             int mouseY = viewModel.getMousePosition().y;
 
-            // Hitung jarak dari player ke mouse
             double distanceToMouse = Math.sqrt(Math.pow(mouseX - playerCenterX, 2) + Math.pow(mouseY - playerCenterY, 2));
-
-            // Batasi panjang laso sesuai LASSO_RANGE
             int lassoRange = viewModel.getLassoRange();
             int endX, endY;
 
             if (distanceToMouse > lassoRange) {
-                // Jika mouse lebih jauh dari jangkauan, batasi ujung laso ke jangkauan maksimum
                 double ratio = lassoRange / distanceToMouse;
                 endX = playerCenterX + (int)((mouseX - playerCenterX) * ratio);
                 endY = playerCenterY + (int)((mouseY - playerCenterY) * ratio);
             } else {
-                // Jika mouse dalam jangkauan, gunakan posisi mouse
                 endX = mouseX;
                 endY = mouseY;
             }
