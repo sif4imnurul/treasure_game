@@ -10,30 +10,22 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
-/**
- * StartView - Halaman utama game "Collect The Skill Balls"
- * Berisi form input nama pemain, tombol mulai game, tabel skor tertinggi, dan tombol keluar
- */
 public class StartView extends JPanel {
 
-    // ===== KOMPONEN UI =====
-    private JTextField inputNamaPemain;           // Field untuk input nama pemain
-    private JButton tombolMulai;                  // Tombol untuk memulai game
-    private JButton tombolKeluar;                 // Tombol untuk keluar dari game
-    private JTable tabelSkorTertinggi;            // Tabel untuk menampilkan high scores
-    private DefaultTableModel modelTabel;        // Model data untuk tabel
+    private JTextField inputNamaPemain;
+    private JButton tombolMulai;
+    private JButton tombolKeluar;
+    private JTable tabelSkorTertinggi;
+    private DefaultTableModel modelTabel;
 
-    // ===== DEPENDENCIES =====
-    private GameViewModel viewModel;              // ViewModel untuk logika bisnis
-    private JFrame frameUtama;                    // Frame utama aplikasi
-    private Image gambarLatar;                    // Gambar background
+    private GameViewModel viewModel;
+    private JFrame frameUtama;
+    private Image gambarLatar;
 
-    // ===== KONSTANTA =====
     private static final Dimension UKURAN_PANEL = new Dimension(1200, 800);
     private static final Dimension UKURAN_TABEL = new Dimension(500, 250);
     private static final String[] KOLOM_TABEL = {"Username", "Score", "Count"};
 
-    // ===== WARNA =====
     private static final Color WARNA_JUDUL = Color.YELLOW;
     private static final Color WARNA_TEKS = Color.WHITE;
     private static final Color WARNA_TOMBOL_MULAI = new Color(50, 150, 50, 220);
@@ -42,9 +34,6 @@ public class StartView extends JPanel {
 
     private static final Color WARNA_SEL_TABEL_BACKGROUND = new Color(0, 0, 0, 100);
 
-    /**
-     * Constructor - Membuat tampilan halaman start
-     */
     public StartView(GameViewModel viewModel, JFrame parentFrame) {
         this.viewModel = viewModel;
         this.frameUtama = parentFrame;
@@ -53,44 +42,30 @@ public class StartView extends JPanel {
         inisialisasiPanel();
         buatKomponenUI();
         aturEventListener();
-        muatDataSkorTertinggi(); // Panggil di sini agar tabel terisi saat StartView pertama kali muncul atau kembali dari game
+        muatDataSkorTertinggi();
     }
 
-    /**
-     * Inisialisasi pengaturan dasar panel
-     */
     private void inisialisasiPanel() {
         setPreferredSize(UKURAN_PANEL);
         setLayout(new GridBagLayout());
         setOpaque(true);
     }
 
-    /**
-     * Membuat semua komponen UI dan menambahkannya ke panel
-     */
     private void buatKomponenUI() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
 
-        // 1. Judul Game
         buatJudulGame(gbc);
 
-        // 2. Label dan Input Nama Pemain
         buatInputNamaPemain(gbc);
 
-        // 3. Tombol Mulai Game
         buatTombolMulai(gbc);
 
-        // 4. Tabel Skor Tertinggi
         buatTabelSkorTertinggi(gbc);
 
-        // 5. Tombol Keluar
         buatTombolKeluar(gbc);
     }
 
-    /**
-     * Membuat dan menambahkan judul game
-     */
     private void buatJudulGame(GridBagConstraints gbc) {
         JLabel labelJudul = new JLabel("COLLECT THE SKILL BALLS");
         labelJudul.setFont(new Font("Arial", Font.BOLD, 48));
@@ -103,11 +78,7 @@ public class StartView extends JPanel {
         add(labelJudul, gbc);
     }
 
-    /**
-     * Membuat label dan field input nama pemain
-     */
     private void buatInputNamaPemain(GridBagConstraints gbc) {
-        // Label Username
         JLabel labelUsername = new JLabel("Username");
         labelUsername.setFont(new Font("Arial", Font.BOLD, 24));
         labelUsername.setForeground(WARNA_TEKS);
@@ -118,7 +89,6 @@ public class StartView extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
         add(labelUsername, gbc);
 
-        // Field Input Nama
         inputNamaPemain = new JTextField(15);
         inputNamaPemain.setFont(new Font("Arial", Font.PLAIN, 24));
         inputNamaPemain.setBackground(WARNA_INPUT_BACKGROUND);
@@ -129,9 +99,6 @@ public class StartView extends JPanel {
         add(inputNamaPemain, gbc);
     }
 
-    /**
-     * Membuat tombol untuk memulai game
-     */
     private void buatTombolMulai(GridBagConstraints gbc) {
         tombolMulai = new JButton("Play");
         tombolMulai.setFont(new Font("Arial", Font.BOLD, 36));
@@ -147,25 +114,19 @@ public class StartView extends JPanel {
         add(tombolMulai, gbc);
     }
 
-    /**
-     * Membuat tabel untuk menampilkan skor tertinggi
-     */
     private void buatTabelSkorTertinggi(GridBagConstraints gbc) {
-        // Inisialisasi model tabel
         modelTabel = new DefaultTableModel(KOLOM_TABEL, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Tabel tidak bisa diedit
+                return false;
             }
         };
 
-        // Membuat tabel normal
         tabelSkorTertinggi = new JTable(modelTabel);
 
         aturGayaTabel();
         aturRendererTabel();
 
-        // Membungkus tabel dalam scroll pane
         JScrollPane scrollPane = new JScrollPane(tabelSkorTertinggi);
         scrollPane.setPreferredSize(UKURAN_TABEL);
         scrollPane.getViewport().setOpaque(false);
@@ -181,9 +142,6 @@ public class StartView extends JPanel {
         add(scrollPane, gbc);
     }
 
-    /**
-     * Mengatur gaya tampilan tabel
-     */
     private void aturGayaTabel() {
         tabelSkorTertinggi.setFont(new Font("Monospaced", Font.PLAIN, 20));
         tabelSkorTertinggi.setRowHeight(28);
@@ -203,9 +161,6 @@ public class StartView extends JPanel {
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
     }
 
-    /**
-     * Mengatur renderer untuk sel tabel
-     */
     private void aturRendererTabel() {
         DefaultTableCellRenderer rendererSel = new DefaultTableCellRenderer() {
             @Override
@@ -225,9 +180,6 @@ public class StartView extends JPanel {
         }
     }
 
-    /**
-     * Membuat tombol untuk keluar dari game
-     */
     private void buatTombolKeluar(GridBagConstraints gbc) {
         tombolKeluar = new JButton("Quit");
         tombolKeluar.setFont(new Font("Arial", Font.BOLD, 36));
@@ -238,17 +190,13 @@ public class StartView extends JPanel {
         tombolKeluar.setFocusPainted(false);
 
         gbc.gridx = 0;
-        gbc.gridy = 4; // Menyesuaikan posisi karena tabel highscore ada di gridy 3
+        gbc.gridy = 4;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         add(tombolKeluar, gbc);
     }
 
-    /**
-     * Mengatur event listener untuk tombol-tombol
-     */
     private void aturEventListener() {
-        // Event untuk tombol mulai game
         tombolMulai.addActionListener((ActionEvent e) -> {
             String namaPemain = inputNamaPemain.getText().trim();
 
@@ -259,13 +207,9 @@ public class StartView extends JPanel {
             }
         });
 
-        // Event untuk tombol keluar
         tombolKeluar.addActionListener((ActionEvent e) -> System.exit(0));
     }
 
-    /**
-     * Menampilkan pesan peringatan jika nama pemain kosong
-     */
     private void tampilkanPesanPeringatan() {
         JOptionPane.showMessageDialog(
                 this,
@@ -275,14 +219,10 @@ public class StartView extends JPanel {
         );
     }
 
-    /**
-     * Memulai game dengan nama pemain yang sudah diinput
-     */
     private void mulaiGame(String namaPemain) {
         viewModel.setPlayerName(namaPemain);
-        viewModel.resetGame(); // Reset game state for a new game
+        viewModel.resetGame();
 
-        // Membersihkan frame dan menampilkan game view
         frameUtama.getContentPane().removeAll();
         GameView gameView = new GameView(viewModel, frameUtama);
         frameUtama.add(gameView);
@@ -291,9 +231,6 @@ public class StartView extends JPanel {
         gameView.requestFocusInWindow();
     }
 
-    /**
-     * Menggambar background panel
-     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -306,11 +243,8 @@ public class StartView extends JPanel {
         }
     }
 
-    /**
-     * Memuat data skor tertinggi dari viewModel ke tabel
-     */
     private void muatDataSkorTertinggi() {
-        modelTabel.setRowCount(0); // Hapus semua data lama
+        modelTabel.setRowCount(0);
 
         List<String[]> daftarSkorTertinggi = viewModel.getHighScores();
         for (String[] dataBaris : daftarSkorTertinggi) {
@@ -318,9 +252,6 @@ public class StartView extends JPanel {
         }
     }
 
-    /**
-     * Method public untuk refresh data skor tertinggi (dipanggil dari luar)
-     */
     public void refreshHighScores() {
         muatDataSkorTertinggi();
     }
