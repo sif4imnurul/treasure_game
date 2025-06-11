@@ -113,9 +113,6 @@ public class GameViewModel {
     public void updateGame() {
         player.updatePosition();
 
-        // Removed boundary checks here
-        // The player can now move freely beyond the panel dimensions.
-
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastFrameTime > FRAME_DELAY) {
             if (player.getVelocityX() != 0 || player.getVelocityY() != 0) {
