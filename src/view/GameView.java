@@ -110,16 +110,16 @@ public class GameView extends JPanel implements ActionListener {
             Image orcFrame = null;
             if (orc.getFullSpriteSheet() != null && orc.getOriginalFrameWidth() != 0) {
                 int sourceX = orc.getCurrentFrame() * orc.getOriginalFrameWidth();
-                // Pastikan tidak melebihi lebar sprite sheet
                 if (sourceX + orc.getOriginalFrameWidth() <= orc.getFullSpriteSheet().getWidth()) {
                     orcFrame = orc.getFullSpriteSheet().getSubimage(sourceX, 0, orc.getOriginalFrameWidth(), orc.getFullSpriteSheet().getHeight());
                 }
             }
 
             if (orcFrame != null) {
-                if (orc.getVelocityX() < 0) { // Bergerak ke kiri, balik gambar
+                if (orc.getVelocityX() < 0) {
                     g.drawImage(orcFrame, orc.getPosX() + orc.getDisplayWidth(), orc.getPosY(), -orc.getDisplayWidth(), orc.getDisplayHeight(), this);
-                } else { // Bergerak ke kanan, gambar normal
+                } else {
+                    // PERBAIKAN DI SINI: Tambahkan 'this' sebagai ImageObserver
                     g.drawImage(orcFrame, orc.getPosX(), orc.getPosY(), orc.getDisplayWidth(), orc.getDisplayHeight(), this);
                 }
             } else {
@@ -153,7 +153,10 @@ public class GameView extends JPanel implements ActionListener {
         String timeString = String.format("Time: %d.%03d", secondsLeft, millisecondsLeft);
         if (viewModel.isGameOver()) {
             timeString = "Time: 0.000 (Game Over!)";
-            gameLoopTimer.stop();
+            gameLoopTimer.stop(); // Berhenti timer saat game over
+
+            // Tampilkan highscore saat game over
+            displayHighScores(g);
         }
         g.drawString(timeString, 10, 60);
 
@@ -170,8 +173,8 @@ public class GameView extends JPanel implements ActionListener {
 
         // Gambar laso
         if (viewModel.isLassoActive()) {
-            int playerCenterX = playerX + playerDisplayWidth / 2;
-            int playerCenterY = playerY + playerDisplayHeight / 2;
+            int playerCenterX = viewModel.getPlayerX() + viewModel.getPlayerDisplayWidth() / 2;
+            int playerCenterY = viewModel.getPlayerY() + viewModel.getPlayerDisplayHeight() / 2;
             int mouseX = viewModel.getMousePosition().x;
             int mouseY = viewModel.getMousePosition().y;
 
@@ -191,6 +194,20 @@ public class GameView extends JPanel implements ActionListener {
             g.setColor(Color.WHITE);
             g.drawLine(playerCenterX, playerCenterY, endX, endY);
             g.fillOval(endX - 5, endY - 5, 10, 10);
+        }
+    }
+
+    // Metode baru untuk menampilkan highscore
+    private void displayHighScores(Graphics g) {
+        List<String> highScores = viewModel.getHighScores();
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 30));
+        g.drawString("HIGHSCORES", (PANEL_WIDTH / 2) - 100, PANEL_HEIGHT / 2 - 100);
+
+        g.setFont(new Font("Arial", Font.PLAIN, 20));
+        int yOffset = PANEL_HEIGHT / 2 - 50;
+        for (int i = 0; i < highScores.size(); i++) {
+            g.drawString((i + 1) + ". " + highScores.get(i), (PANEL_WIDTH / 2) - 70, yOffset + (i * 30));
         }
     }
 

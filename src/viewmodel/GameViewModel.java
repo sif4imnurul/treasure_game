@@ -3,6 +3,7 @@ package viewmodel;
 import model.Player;
 import model.Orc;
 import model.Coin;
+import config.Database;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -14,14 +15,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
 import java.util.Random;
+import java.sql.ResultSet; // Import ResultSet
+import java.sql.SQLException; // Import SQLException
 
 public class GameViewModel {
     private Player player;
     private List<Orc> orcs;
     private List<Coin> coins;
-    private final int PLAYER_SPEED = 7; // Kecepatan pemain dipercepat sedikit dari 5 menjadi 7
-    private final int ORC_SPEED = 6;   // Kecepatan Orc (lebih cepat dari koin)
-    private final int COIN_SPEED = 4;  // Kecepatan Koin (lebih lambat dari orc)
+    private final int PLAYER_SPEED = 7;
+    private final int ORC_SPEED = 6;
+    private final int COIN_SPEED = 4;
     private final int SPAWN_INTERVAL = 1500;
     private long lastSpawnTime;
 
@@ -74,10 +77,13 @@ public class GameViewModel {
     private final int BOTTOM_LANE_Y;
     private Random random;
 
+    private Database db; // Tambahkan instance Database
+
     public GameViewModel(int panelWidth, int panelHeight) {
         this.gamePanelWidth = panelWidth;
         this.gamePanelHeight = panelHeight;
         this.random = new Random();
+        this.db = new Database(); // Inisialisasi database
 
         TOP_LANE_Y = (int) (gamePanelHeight * 0.25);
         BOTTOM_LANE_Y = (int) (gamePanelHeight * 0.75);
@@ -244,15 +250,14 @@ public class GameViewModel {
             int spawnX;
 
             if (spawnOrc) { // Jika Orc
-                initialVelocity = useTopLane ? -ORC_SPEED : ORC_SPEED; // Gunakan ORC_SPEED
+                initialVelocity = useTopLane ? -ORC_SPEED : ORC_SPEED;
             } else { // Jika Koin
-                initialVelocity = useTopLane ? -COIN_SPEED : COIN_SPEED; // Gunakan COIN_SPEED
+                initialVelocity = useTopLane ? -COIN_SPEED : COIN_SPEED;
             }
 
             if (useTopLane) { // Bergerak ke kiri (muncul dari kanan)
                 spawnX = gamePanelWidth + 10;
             } else { // Bergerak ke kanan (muncul dari kiri)
-                // Sesuaikan spawnX berdasarkan jenis entitas untuk memastikan jarak yang konsisten
                 if (spawnOrc) {
                     int orcWidth = (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50) * SCALE_FACTOR_ENEMY;
                     spawnX = -10 - orcWidth;
@@ -271,7 +276,7 @@ public class GameViewModel {
                         originalOrcFrameWidth * SCALE_FACTOR_ENEMY,
                         (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getHeight() : 50) * SCALE_FACTOR_ENEMY,
                         fullSpriteSheetOrc,
-                        initialVelocity, // Gunakan initialVelocity yang sudah disesuaikan
+                        initialVelocity,
                         originalOrcFrameWidth,
                         totalOrcFrames
                 );
@@ -285,7 +290,7 @@ public class GameViewModel {
                         coinDisplayWidth,
                         coinDisplayHeight,
                         coinImage,
-                        initialVelocity // Gunakan initialVelocity yang sudah disesuaikan
+                        initialVelocity
                 );
                 coins.add(newCoin);
                 System.out.println("Coin baru muncul di jalur " + (useTopLane ? "atas" : "bawah") + " dengan kecepatan " + initialVelocity);
@@ -344,6 +349,7 @@ public class GameViewModel {
         if (System.currentTimeMillis() - gameStartTime >= GAME_DURATION) {
             isGameOver = true;
             System.out.println("Game Over! Waktu Habis. Skor Akhir: " + score);
+            saveScore(score); // Panggil method untuk menyimpan skor
             return;
         }
 
@@ -362,7 +368,6 @@ public class GameViewModel {
             }
         }
 
-        // Update posisi pemain - TIDAK ADA BATASAN LAYAR
         player.setPosX(player.getPosX() + player.getVelocityX());
         player.setPosY(player.getPosY() + player.getVelocityY());
 
@@ -422,6 +427,36 @@ public class GameViewModel {
         if (isLassoActive) {
             checkLassoCollision();
         }
+    }
+
+    // Method untuk menyimpan skor ke database
+    private void saveScore(int score) {
+        // Untuk contoh ini, kita akan menggunakan nama pemain default "Player1".
+        // Di aplikasi nyata, Anda mungkin ingin meminta nama pemain.
+        String playerName = "Player1";
+        String sql = "INSERT INTO highscores (player_name, score) VALUES ('" + playerName + "', " + score + ")";
+        try {
+            db.insertUpdateDeleteQuery(sql);
+            System.out.println("Skor " + score + " berhasil disimpan untuk " + playerName);
+        } catch (RuntimeException e) {
+            System.err.println("Gagal menyimpan skor: " + e.getMessage());
+        }
+    }
+
+    // Method untuk mengambil highscores dari database
+    public List<String> getHighScores() {
+        List<String> highScores = new ArrayList<>();
+        String sql = "SELECT player_name, score FROM highscores ORDER BY score DESC LIMIT 5"; // Ambil 5 highscore teratas
+        try (ResultSet rs = db.selectQuery(sql)) {
+            while (rs.next()) {
+                String playerName = rs.getString("player_name");
+                int score = rs.getInt("score");
+                highScores.add(playerName + ": " + score);
+            }
+        } catch (SQLException e) {
+            System.err.println("Gagal mengambil highscores: " + e.getMessage());
+        }
+        return highScores;
     }
 
     public Image getCurrentPlayerFrame() {

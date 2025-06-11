@@ -12,7 +12,7 @@ public class Main {
             GameViewModel viewModel = new GameViewModel(FRAME_WIDTH, FRAME_HEIGHT);
             GameView gameView = new GameView(viewModel);
 
-            JFrame frame = new JFrame("MVVM Game");
+            JFrame frame = new JFrame("Treasure Game");
             frame.add(gameView);
             frame.pack();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

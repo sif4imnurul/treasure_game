@@ -1,3 +1,5 @@
+package config;
+
 import java.sql.*;
 
 public class Database {
@@ -8,7 +10,7 @@ public class Database {
     //constructor
     public Database() {
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db_game_treasure", "root", "");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db_treasure_game", "root", "");
             statement = connection.createStatement();
         }catch (SQLException e){
             throw new RuntimeException(e);
