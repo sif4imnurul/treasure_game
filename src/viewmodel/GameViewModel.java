@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.util.Random;
 
 public class GameViewModel {
