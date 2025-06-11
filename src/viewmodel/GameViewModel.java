@@ -1,3 +1,5 @@
+// package viewmodel;
+// File: viewmodel/GameViewModel.java
 package viewmodel;
 
 import model.Player;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
+import java.awt.Rectangle;
 
 public class GameViewModel {
     private Player player;
@@ -26,6 +29,7 @@ public class GameViewModel {
     private int gamePanelHeight;
 
     private BufferedImage fullSpriteSheetPlayer;
+    private BufferedImage fullSpriteSheetPlayerHurt; // Sprite sheet untuk soldier-hurt
     private BufferedImage fullSpriteSheetOrc;
     private BufferedImage coinImage;
     private BufferedImage backgroundImage;
@@ -42,6 +46,14 @@ public class GameViewModel {
     private int totalFramesPlayer;
     private long lastFrameTimePlayer;
     private final long FRAME_DELAY_PLAYER = 70;
+
+    private boolean isPlayerHurt = false; // Status apakah player sedang hurt
+    private long hurtStartTime = 0; // Waktu mulai hurt
+    private final long HURT_DURATION = 1000; // Durasi hurt dalam milliseconds (1 detik)
+
+    private int currentFramePlayerHurt = 1; // Frame hurt dimulai dari frame 1 (frame ke-2)
+    private long lastFrameTimePlayerHurt;
+    private final long FRAME_DELAY_PLAYER_HURT = 250; // Delay antar frame hurt (0.25 detik)
 
     private final int SCALE_FACTOR_PLAYER = 5;
     private final int SCALE_FACTOR_ENEMY = 3;
@@ -74,6 +86,21 @@ public class GameViewModel {
         } else {
             System.err.println("ERROR: Sprite sheet pemain tidak ditemukan di assets/soldier-walk.png.");
             fullSpriteSheetPlayer = null;
+        }
+
+        // Memuat sprite sheet pemain hurt
+        URL playerHurtImageUrl = getClass().getClassLoader().getResource("assets/soldier-hurt.png");
+        if (playerHurtImageUrl != null) {
+            try {
+                fullSpriteSheetPlayerHurt = ImageIO.read(playerHurtImageUrl);
+                System.out.println("Sprite sheet pemain hurt berhasil dimuat: " + playerHurtImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat sprite sheet pemain hurt: " + e.getMessage());
+                fullSpriteSheetPlayerHurt = null;
+            }
+        } else {
+            System.err.println("ERROR: Sprite sheet pemain hurt tidak ditemukan di assets/soldier-hurt.png.");
+            fullSpriteSheetPlayerHurt = null;
         }
 
         // Memuat gambar latar belakang (background-cave.png)
@@ -235,6 +262,11 @@ public class GameViewModel {
             if (distanceToOrc < LASSO_RANGE && distanceMouseToOrc < LASSO_GRAB_TOLERANCE) {
                 score += 100;
                 singleOrc = null; // Orc hilang
+                isPlayerHurt = true; // Player berubah jadi hurt setelah nangkep orc
+                hurtStartTime = System.currentTimeMillis(); // Catat waktu mulai hurt
+                lastFrameTimePlayerHurt = System.currentTimeMillis(); // Reset timer frame hurt
+                currentFramePlayerHurt = 1; // Mulai dari frame ke-2 (index 1)
+                System.out.println("Player menangkap Orc! Status berubah menjadi hurt untuk " + (HURT_DURATION/1000.0) + " detik.");
             }
         }
 
@@ -262,6 +294,21 @@ public class GameViewModel {
     }
 
     public void updateGame() {
+        // Update status hurt player - cek apakah sudah waktunya kembali normal
+        if (isPlayerHurt) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - hurtStartTime >= HURT_DURATION) {
+                isPlayerHurt = false;
+                System.out.println("Player kembali normal dari status hurt.");
+            } else {
+                // Update animasi hurt (frame 1 dan 2, yaitu foto ke-2 dan ke-3)
+                if (currentTime - lastFrameTimePlayerHurt > FRAME_DELAY_PLAYER_HURT) {
+                    currentFramePlayerHurt = (currentFramePlayerHurt == 1) ? 2 : 1; // Toggle antara frame 1 dan 2
+                    lastFrameTimePlayerHurt = currentTime;
+                }
+            }
+        }
+
         // Update posisi pemain - TIDAK ADA BATASAN LAGI!
         player.setPosX(player.getPosX() + player.getVelocityX());
         player.setPosY(player.getPosY() + player.getVelocityY());
@@ -321,11 +368,27 @@ public class GameViewModel {
     }
 
     public Image getCurrentPlayerFrame() {
-        if (fullSpriteSheetPlayer == null || originalFrameWidthPlayer == 0 || originalFrameHeightPlayer == 0) {
+        BufferedImage currentSpriteSheet;
+        int frameToUse = 0;
+        int frameWidth = originalFrameWidthPlayer;
+        int frameHeight = originalFrameHeightPlayer;
+
+        // Pilih sprite sheet berdasarkan status player
+        if (isPlayerHurt && fullSpriteSheetPlayerHurt != null) {
+            currentSpriteSheet = fullSpriteSheetPlayerHurt;
+            frameToUse = currentFramePlayerHurt; // Gunakan frame hurt (1 atau 2)
+            // Asumsi sprite sheet hurt memiliki struktur yang sama
+        } else {
+            currentSpriteSheet = fullSpriteSheetPlayer;
+            frameToUse = currentFramePlayer; // Gunakan frame normal
+        }
+
+        if (currentSpriteSheet == null || frameWidth == 0 || frameHeight == 0) {
             return null;
         }
-        int sourceX = currentFramePlayer * originalFrameWidthPlayer;
-        return fullSpriteSheetPlayer.getSubimage(sourceX, 0, originalFrameWidthPlayer, originalFrameHeightPlayer);
+
+        int sourceX = frameToUse * frameWidth;
+        return currentSpriteSheet.getSubimage(sourceX, 0, frameWidth, frameHeight);
     }
 
     public Image getBackgroundImage() {
@@ -353,4 +416,7 @@ public class GameViewModel {
     public int getChestPosY() { return chestPosY; }
     public int getChestDisplayWidth() { return chestDisplayWidth; }
     public int getChestDisplayHeight() { return chestDisplayHeight; }
+
+    // Getter untuk status player hurt
+    public boolean isPlayerHurt() { return isPlayerHurt; }
 }
