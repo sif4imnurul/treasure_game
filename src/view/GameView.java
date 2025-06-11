@@ -1,5 +1,6 @@
 package view;
 
+import model.Player;
 import viewmodel.GameViewModel;
 import model.Orc;
 import model.Coin;
@@ -12,6 +13,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 public class GameView extends JPanel implements ActionListener {
@@ -106,7 +108,13 @@ public class GameView extends JPanel implements ActionListener {
         // Gambar Orc tunggal (jika masih ada)
         Orc singleOrc = viewModel.getSingleOrc();
         if (singleOrc != null) {
-            Image orcFrame = singleOrc.getCurrentFrameImage();
+            // Logika untuk mendapatkan frame Orc saat ini
+            Image orcFrame = null;
+            if (singleOrc.getFullSpriteSheet() != null && singleOrc.getOriginalFrameWidth() != 0) {
+                int sourceX = singleOrc.getCurrentFrame() * singleOrc.getOriginalFrameWidth();
+                orcFrame = singleOrc.getFullSpriteSheet().getSubimage(sourceX, 0, singleOrc.getOriginalFrameWidth(), singleOrc.getFullSpriteSheet().getHeight());
+            }
+
             if (orcFrame != null) {
                 if (singleOrc.getVelocityX() < 0) {
                     g.drawImage(orcFrame, singleOrc.getPosX() + singleOrc.getDisplayWidth(), singleOrc.getPosY(), -singleOrc.getDisplayWidth(), singleOrc.getDisplayHeight(), this);
@@ -124,18 +132,20 @@ public class GameView extends JPanel implements ActionListener {
         for (Coin coin : coins) {
             Image coinImage = coin.getImage();
             if (coinImage != null) {
-                if (coin.getVelocityX() < 0) {
-                    g.drawImage(coinImage, coin.getPosX() + coin.getDisplayWidth(), coin.getPosY(), -coin.getDisplayWidth(), coin.getDisplayHeight(), this);
-                } else {
-                    g.drawImage(coinImage, coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight(), this);
-                }
+                // No need to flip coin image based on velocity, coins just move
+                g.drawImage(coinImage, coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight(), this);
             } else {
                 g.setColor(Color.YELLOW);
                 g.fillRect(coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight());
             }
         }
 
-        // Gambar peti harta karun
+        // Gambar skor
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 24));
+        g.drawString("Score: " + viewModel.getScore(), 10, 30);
+
+        // Gambar peti harta karun (di bawah skor)
         Image chestImage = viewModel.getChestOpenImage();
         if (chestImage != null) {
             g.drawImage(chestImage, viewModel.getChestPosX(), viewModel.getChestPosY(),
@@ -146,18 +156,35 @@ public class GameView extends JPanel implements ActionListener {
                     viewModel.getChestDisplayWidth(), viewModel.getChestDisplayHeight());
         }
 
-        // Gambar laso
+        // Gambar laso dengan panjang terbatas
         if (viewModel.isLassoActive()) {
-            g.setColor(Color.WHITE);
-            g.drawLine(playerX + playerDisplayWidth / 2, playerY + playerDisplayHeight / 2,
-                    viewModel.getMousePosition().x, viewModel.getMousePosition().y);
-            g.fillOval(viewModel.getMousePosition().x - 5, viewModel.getMousePosition().y - 5, 10, 10);
-        }
+            int playerCenterX = playerX + playerDisplayWidth / 2;
+            int playerCenterY = playerY + playerDisplayHeight / 2;
+            int mouseX = viewModel.getMousePosition().x;
+            int mouseY = viewModel.getMousePosition().y;
 
-        // Gambar skor
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 24));
-        g.drawString("Score: " + viewModel.getScore(), 10, 30);
+            // Hitung jarak dari player ke mouse
+            double distanceToMouse = Math.sqrt(Math.pow(mouseX - playerCenterX, 2) + Math.pow(mouseY - playerCenterY, 2));
+
+            // Batasi panjang laso sesuai LASSO_RANGE
+            int lassoRange = viewModel.getLassoRange();
+            int endX, endY;
+
+            if (distanceToMouse > lassoRange) {
+                // Jika mouse lebih jauh dari jangkauan, batasi ujung laso ke jangkauan maksimum
+                double ratio = lassoRange / distanceToMouse;
+                endX = playerCenterX + (int)((mouseX - playerCenterX) * ratio);
+                endY = playerCenterY + (int)((mouseY - playerCenterY) * ratio);
+            } else {
+                // Jika mouse dalam jangkauan, gunakan posisi mouse
+                endX = mouseX;
+                endY = mouseY;
+            }
+
+            g.setColor(Color.WHITE);
+            g.drawLine(playerCenterX, playerCenterY, endX, endY);
+            g.fillOval(endX - 5, endY - 5, 10, 10);
+        }
     }
 
     @Override

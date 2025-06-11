@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.awt.Point;
-import java.awt.Rectangle;
 
 public class GameViewModel {
     private Player player;
@@ -29,8 +28,8 @@ public class GameViewModel {
     private BufferedImage fullSpriteSheetPlayer;
     private BufferedImage fullSpriteSheetOrc;
     private BufferedImage coinImage;
-    private BufferedImage backgroundImage; // Nama variabel tetap sama
-    private BufferedImage chestOpenImage;  // Nama variabel tetap sama
+    private BufferedImage backgroundImage;
+    private BufferedImage chestOpenImage;
 
     private int chestPosX;
     private int chestPosY;
@@ -51,6 +50,7 @@ public class GameViewModel {
     private Point mousePosition;
     private final int LASSO_RANGE = 200;
     private final int LASSO_GRAB_TOLERANCE = 30;
+    private final int COIN_COLLECT_SPEED = 10; // Speed at which coin moves to chest
 
     private int score = 0;
 
@@ -77,7 +77,7 @@ public class GameViewModel {
         }
 
         // Memuat gambar latar belakang (background-cave.png)
-        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background-cave.png"); // Diubah ke strip (-)
+        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background-cave.png");
         if (backgroundImageUrl != null) {
             try {
                 backgroundImage = ImageIO.read(backgroundImageUrl);
@@ -87,12 +87,12 @@ public class GameViewModel {
                 backgroundImage = null;
             }
         } else {
-            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background-cave.png."); // Diubah ke strip (-)
+            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background-cave.png.");
             backgroundImage = null;
         }
 
-        // Memuat sprite sheet Orc (orc_attack.png)
-        URL orcImageUrl = getClass().getClassLoader().getResource("assets/orc_attack.png");
+        // Memuat sprite sheet Orc (orc-attack.png)
+        URL orcImageUrl = getClass().getClassLoader().getResource("assets/orc-attack.png");
         if (orcImageUrl != null) {
             try {
                 fullSpriteSheetOrc = ImageIO.read(orcImageUrl);
@@ -102,7 +102,7 @@ public class GameViewModel {
                 fullSpriteSheetOrc = null;
             }
         } else {
-            System.err.println("ERROR: Sprite sheet orc tidak ditemukan di assets/orc_attack.png.");
+            System.err.println("ERROR: Sprite sheet orc tidak ditemukan di assets/orc-attack.png.");
             fullSpriteSheetOrc = null;
         }
 
@@ -122,7 +122,7 @@ public class GameViewModel {
         }
 
         // Memuat gambar Peti Terbuka (chest-open.png)
-        URL chestImageUrl = getClass().getClassLoader().getResource("assets/chest-open.png"); // Diubah ke strip (-)
+        URL chestImageUrl = getClass().getClassLoader().getResource("assets/chest-open.png");
         if (chestImageUrl != null) {
             try {
                 chestOpenImage = ImageIO.read(chestImageUrl);
@@ -132,7 +132,7 @@ public class GameViewModel {
                 chestOpenImage = null;
             }
         } else {
-            System.err.println("ERROR: Gambar peti terbuka tidak ditemukan di assets/chest-open.png."); // Diubah ke strip (-)
+            System.err.println("ERROR: Gambar peti terbuka tidak ditemukan di assets/chest-open.png.");
             chestOpenImage = null;
         }
 
@@ -162,6 +162,12 @@ public class GameViewModel {
                 totalOrcFrames
         );
 
+        // Inisialisasi posisi dan ukuran Peti Harta Karun
+        chestDisplayWidth = 100;
+        chestDisplayHeight = 100;
+        chestPosX = 10;
+        chestPosY = 30 + 10; // Y di bawah skor + sedikit padding
+
         // Inisialisasi Coins
         coins = new ArrayList<>();
         int coinDisplayWidth = 30 * SCALE_FACTOR_ENEMY / 2;
@@ -181,12 +187,6 @@ public class GameViewModel {
                     initialVelocity
             ));
         }
-
-        // Inisialisasi posisi dan ukuran Peti Harta Karun
-        chestDisplayWidth = 100; // Ukuran lebar tetap
-        chestDisplayHeight = 100; // Ukuran tinggi tetap
-        chestPosX = gamePanelWidth - chestDisplayWidth - 20; // Contoh: di kanan atas
-        chestPosY = 10; // Contoh: di kanan atas
 
         lastFrameTimePlayer = System.currentTimeMillis();
         mousePosition = new Point(0,0);
@@ -227,10 +227,10 @@ public class GameViewModel {
     private void checkLassoCollision() {
         // Cek Orc
         if (singleOrc != null) {
-            double distanceToOrc = player.getDistanceTo(singleOrc.getPosX() + singleOrc.getDisplayWidth() / 2,
-                    singleOrc.getPosY() + singleOrc.getDisplayHeight() / 2);
-            double distanceMouseToOrc = mousePosition.distance(singleOrc.getPosX() + singleOrc.getDisplayWidth() / 2,
-                    singleOrc.getPosY() + singleOrc.getDisplayHeight() / 2);
+            int orcCenterX = singleOrc.getPosX() + singleOrc.getDisplayWidth() / 2;
+            int orcCenterY = singleOrc.getPosY() + singleOrc.getDisplayHeight() / 2;
+            double distanceToOrc = Math.sqrt(Math.pow(orcCenterX - (player.getPosX() + player.getDisplayWidth() / 2), 2) + Math.pow(orcCenterY - (player.getPosY() + player.getDisplayHeight() / 2), 2));
+            double distanceMouseToOrc = mousePosition.distance(orcCenterX, orcCenterY);
 
             if (distanceToOrc < LASSO_RANGE && distanceMouseToOrc < LASSO_GRAB_TOLERANCE) {
                 score += 100;
@@ -239,30 +239,72 @@ public class GameViewModel {
         }
 
         // Cek Coin
-        Iterator<Coin> iterator = coins.iterator();
-        while (iterator.hasNext()) {
-            Coin coin = iterator.next();
-            double distanceToCoin = player.getDistanceTo(coin.getPosX() + coin.getDisplayWidth() / 2,
-                    coin.getPosY() + coin.getDisplayHeight() / 2);
-            double distanceMouseToCoin = mousePosition.distance(coin.getPosX() + coin.getDisplayWidth() / 2,
-                    coin.getPosY() + coin.getDisplayHeight() / 2);
+        // Iterate using a standard for loop to avoid ConcurrentModificationException if removing
+        for (int i = 0; i < coins.size(); i++) {
+            Coin coin = coins.get(i);
+            if (coin.isCollected()) { // Skip if already collected and moving to chest
+                continue;
+            }
+
+            int coinCenterX = coin.getPosX() + coin.getDisplayWidth() / 2;
+            int coinCenterY = coin.getPosY() + coin.getDisplayHeight() / 2;
+            double distanceToCoin = Math.sqrt(Math.pow(coinCenterX - (player.getPosX() + player.getDisplayWidth() / 2), 2) + Math.pow(coinCenterY - (player.getPosY() + player.getDisplayHeight() / 2), 2));
+            double distanceMouseToCoin = mousePosition.distance(coinCenterX, coinCenterY);
 
             if (distanceToCoin < LASSO_RANGE && distanceMouseToCoin < LASSO_GRAB_TOLERANCE) {
                 score += 50;
-                iterator.remove(); // Koin hilang (berarti masuk ke peti)
+                coin.setCollected(true);
+                coin.setTargetX(chestPosX + chestDisplayWidth / 2 - coin.getDisplayWidth() / 2);
+                coin.setTargetY(chestPosY + chestDisplayHeight / 2 - coin.getDisplayHeight() / 2);
+                coin.setVelocityX(0); // Stop horizontal movement
             }
         }
     }
 
     public void updateGame() {
-        player.updatePosition();
+        // Update posisi pemain - TIDAK ADA BATASAN LAGI!
+        player.setPosX(player.getPosX() + player.getVelocityX());
+        player.setPosY(player.getPosY() + player.getVelocityY());
 
+        // KODE PEMBATASAN PLAYER SUDAH DIHAPUS - Player bisa bergerak bebas keluar layar
+
+        // Update posisi Orc
         if (singleOrc != null) {
-            singleOrc.updatePosition(gamePanelWidth);
+            singleOrc.setPosX(singleOrc.getPosX() + singleOrc.getVelocityX());
+            if (singleOrc.getPosX() <= 0 || singleOrc.getPosX() + singleOrc.getDisplayWidth() >= gamePanelWidth) {
+                singleOrc.setVelocityX(singleOrc.getVelocityX() * -1);
+            }
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - singleOrc.getLastFrameTime() > singleOrc.getFrameDelay()) {
+                singleOrc.setCurrentFrame((singleOrc.getCurrentFrame() + 1) % singleOrc.getTotalFrames());
+                singleOrc.setLastFrameTime(currentTime);
+            }
         }
 
-        for (Coin coin : coins) {
-            coin.updatePosition(gamePanelWidth);
+        // Update posisi Coins
+        Iterator<Coin> coinIterator = coins.iterator();
+        while (coinIterator.hasNext()) {
+            Coin coin = coinIterator.next();
+            if (coin.isCollected()) {
+                // Move coin towards the chest
+                int dx = coin.getTargetX() - coin.getPosX();
+                int dy = coin.getTargetY() - coin.getPosY();
+                double distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < COIN_COLLECT_SPEED) {
+                    coin.setPosX(coin.getTargetX());
+                    coin.setPosY(coin.getTargetY());
+                    coinIterator.remove(); // Remove coin once it reaches the chest
+                } else {
+                    coin.setPosX(coin.getPosX() + (int)(dx / distance * COIN_COLLECT_SPEED));
+                    coin.setPosY(coin.getPosY() + (int)(dy / distance * COIN_COLLECT_SPEED));
+                }
+            } else {
+                coin.setPosX(coin.getPosX() + coin.getVelocityX());
+                if (coin.getPosX() <= 0 || coin.getPosX() + coin.getDisplayWidth() >= gamePanelWidth) {
+                    coin.setVelocityX(coin.getVelocityX() * -1);
+                }
+            }
         }
 
         long currentTime = System.currentTimeMillis();
@@ -301,6 +343,7 @@ public class GameViewModel {
 
     public boolean isLassoActive() { return isLassoActive; }
     public Point getMousePosition() { return mousePosition; }
+    public int getLassoRange() { return LASSO_RANGE; } // Getter untuk LASSO_RANGE
 
     public int getScore() { return score; }
 

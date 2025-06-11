@@ -1,8 +1,6 @@
 package model;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.awt.Rectangle;
 
 public class Orc {
     private int posX;
@@ -11,8 +9,7 @@ public class Orc {
     private int displayHeight;
     private BufferedImage fullSpriteSheet;
     private int velocityX;
-
-    private int currentFrame = 0;
+    private int currentFrame;
     private int originalFrameWidth;
     private int totalFrames;
     private long lastFrameTime;
@@ -25,10 +22,10 @@ public class Orc {
         this.displayHeight = displayHeight;
         this.fullSpriteSheet = fullSpriteSheet;
         this.velocityX = initialVelocityX;
-
         this.originalFrameWidth = originalFrameWidth;
         this.totalFrames = totalFrames;
         this.lastFrameTime = System.currentTimeMillis();
+        this.currentFrame = 0; // Initialize currentFrame
     }
 
     public int getPosX() { return posX; }
@@ -36,34 +33,21 @@ public class Orc {
     public int getDisplayWidth() { return displayWidth; }
     public int getDisplayHeight() { return displayHeight; }
     public int getVelocityX() { return velocityX; }
-
-    public Image getCurrentFrameImage() {
-        if (fullSpriteSheet == null || originalFrameWidth == 0) {
-            return null;
-        }
-        int sourceX = currentFrame * originalFrameWidth;
-        return fullSpriteSheet.getSubimage(sourceX, 0, originalFrameWidth, fullSpriteSheet.getHeight());
-    }
+    public BufferedImage getFullSpriteSheet() { return fullSpriteSheet; }
+    public int getCurrentFrame() { return currentFrame; }
+    public int getOriginalFrameWidth() { return originalFrameWidth; }
+    public int getTotalFrames() { return totalFrames; }
+    public long getLastFrameTime() { return lastFrameTime; }
+    public long getFrameDelay() { return FRAME_DELAY; }
 
     public void setPosX(int x) { this.posX = x; }
     public void setPosY(int y) { this.posY = y; }
+    public void setDisplayWidth(int displayWidth) { this.displayWidth = displayWidth; }
+    public void setDisplayHeight(int displayHeight) { this.displayHeight = displayHeight; }
+    public void setFullSpriteSheet(BufferedImage fullSpriteSheet) { this.fullSpriteSheet = fullSpriteSheet; }
     public void setVelocityX(int velocityX) { this.velocityX = velocityX; }
-
-    public void updatePosition(int panelWidth) {
-        this.posX += this.velocityX;
-
-        if (this.posX <= 0 || this.posX + this.displayWidth >= panelWidth) {
-            this.velocityX *= -1;
-        }
-
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastFrameTime > FRAME_DELAY) {
-            currentFrame = (currentFrame + 1) % totalFrames;
-            lastFrameTime = currentTime;
-        }
-    }
-
-    public Rectangle getBounds() {
-        return new Rectangle(posX, posY, displayWidth, displayHeight);
-    }
+    public void setCurrentFrame(int currentFrame) { this.currentFrame = currentFrame; }
+    public void setOriginalFrameWidth(int originalFrameWidth) { this.originalFrameWidth = originalFrameWidth; }
+    public void setTotalFrames(int totalFrames) { this.totalFrames = totalFrames; }
+    public void setLastFrameTime(long lastFrameTime) { this.lastFrameTime = lastFrameTime; }
 }

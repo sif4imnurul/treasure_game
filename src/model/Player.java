@@ -1,17 +1,18 @@
 package model;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage; // Changed to BufferedImage for sprite sheet
 
 public class Player {
     private int posX;
     private int posY;
     private int displayWidth;
     private int displayHeight;
-    private Image image;
+    private BufferedImage image; // Changed to BufferedImage
     private int velocityX;
     private int velocityY;
 
-    public Player(int posX, int posY, int displayWidth, int displayHeight, Image image) {
+    public Player(int posX, int posY, int displayWidth, int displayHeight, BufferedImage image) {
         this.posX = posX;
         this.posY = posY;
         this.displayWidth = displayWidth;
@@ -33,18 +34,7 @@ public class Player {
     public void setPosY(int y) { this.posY = y; }
     public void setDisplayWidth(int displayWidth) { this.displayWidth = displayWidth; }
     public void setDisplayHeight(int displayHeight) { this.displayHeight = displayHeight; }
-    public void setImage(Image image) { this.image = image; }
+    public void setImage(BufferedImage image) { this.image = image; }
     public void setVelocityX(int velocityX) { this.velocityX = velocityX; }
     public void setVelocityY(int velocityY) { this.velocityY = velocityY; }
-
-    public void updatePosition() {
-        this.posX += this.velocityX;
-        this.posY += this.velocityY;
-    }
-
-    public double getDistanceTo(int targetX, int targetY) {
-        int playerCenterX = this.posX + this.displayWidth / 2;
-        int playerCenterY = this.posY + this.displayHeight / 2;
-        return Math.sqrt(Math.pow(targetX - playerCenterX, 2) + Math.pow(targetY - playerCenterY, 2));
-    }
 }
