@@ -21,7 +21,6 @@ public class Player {
         this.velocityY = 0;
     }
 
-    // Getter
     public int getPosX() { return posX; }
     public int getPosY() { return posY; }
     public int getDisplayWidth() { return displayWidth; }
@@ -30,7 +29,6 @@ public class Player {
     public int getVelocityX() { return velocityX; }
     public int getVelocityY() { return velocityY; }
 
-    // Setter
     public void setPosX(int x) { this.posX = x; }
     public void setPosY(int y) { this.posY = y; }
     public void setDisplayWidth(int displayWidth) { this.displayWidth = displayWidth; }
@@ -44,7 +42,6 @@ public class Player {
         this.posY += this.velocityY;
     }
 
-    // Metode baru untuk menghitung jarak ke titik lain
     public double getDistanceTo(int targetX, int targetY) {
         int playerCenterX = this.posX + this.displayWidth / 2;
         int playerCenterY = this.posY + this.displayHeight / 2;

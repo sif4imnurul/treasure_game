@@ -2,7 +2,7 @@ package viewmodel;
 
 import model.Player;
 import model.Orc;
-import model.Coin; // Import Coin
+import model.Coin;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -18,18 +18,24 @@ import java.awt.Rectangle;
 public class GameViewModel {
     private Player player;
     private Orc singleOrc;
-    private List<Coin> coins; // Menggunakan List<Coin>
+    private List<Coin> coins;
     private final int PLAYER_SPEED = 5;
     private final int ENEMY_SPEED = 2;
-    private final int COIN_COUNT = 5; // Jumlah koin yang akan muncul
+    private final int COIN_COUNT = 5;
 
     private int gamePanelWidth;
     private int gamePanelHeight;
 
     private BufferedImage fullSpriteSheetPlayer;
     private BufferedImage fullSpriteSheetOrc;
-    private BufferedImage coinImage; // Gambar tunggal untuk koin
-    private BufferedImage backgroundImage;
+    private BufferedImage coinImage;
+    private BufferedImage backgroundImage; // Nama variabel tetap sama
+    private BufferedImage chestOpenImage;  // Nama variabel tetap sama
+
+    private int chestPosX;
+    private int chestPosY;
+    private int chestDisplayWidth;
+    private int chestDisplayHeight;
 
     private int currentFramePlayer = 0;
     private int originalFrameWidthPlayer;
@@ -39,15 +45,13 @@ public class GameViewModel {
     private final long FRAME_DELAY_PLAYER = 70;
 
     private final int SCALE_FACTOR_PLAYER = 5;
-    private final int SCALE_FACTOR_ENEMY = 3; // Untuk orc/koin
+    private final int SCALE_FACTOR_ENEMY = 3;
 
-    // Lasso/Fishing state
     private boolean isLassoActive = false;
     private Point mousePosition;
     private final int LASSO_RANGE = 200;
     private final int LASSO_GRAB_TOLERANCE = 30;
 
-    // Skor
     private int score = 0;
 
     public GameViewModel(int panelWidth, int panelHeight) {
@@ -72,8 +76,8 @@ public class GameViewModel {
             fullSpriteSheetPlayer = null;
         }
 
-        // Memuat gambar latar belakang
-        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background_cave.png");
+        // Memuat gambar latar belakang (background-cave.png)
+        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background-cave.png"); // Diubah ke strip (-)
         if (backgroundImageUrl != null) {
             try {
                 backgroundImage = ImageIO.read(backgroundImageUrl);
@@ -83,7 +87,7 @@ public class GameViewModel {
                 backgroundImage = null;
             }
         } else {
-            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background_cave.png.");
+            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background-cave.png."); // Diubah ke strip (-)
             backgroundImage = null;
         }
 
@@ -102,8 +106,8 @@ public class GameViewModel {
             fullSpriteSheetOrc = null;
         }
 
-        // Memuat gambar Coin (coin.png) - GAMBAR TUNGGAL
-        URL coinImageUrl = getClass().getClassLoader().getResource("assets/coin.png"); // Ganti ke coin.png
+        // Memuat gambar Coin (coin.png)
+        URL coinImageUrl = getClass().getClassLoader().getResource("assets/coin.png");
         if (coinImageUrl != null) {
             try {
                 coinImage = ImageIO.read(coinImageUrl);
@@ -117,6 +121,20 @@ public class GameViewModel {
             coinImage = null;
         }
 
+        // Memuat gambar Peti Terbuka (chest-open.png)
+        URL chestImageUrl = getClass().getClassLoader().getResource("assets/chest-open.png"); // Diubah ke strip (-)
+        if (chestImageUrl != null) {
+            try {
+                chestOpenImage = ImageIO.read(chestImageUrl);
+                System.out.println("Gambar peti terbuka berhasil dimuat: " + chestImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat gambar peti terbuka: " + e.getMessage());
+                chestOpenImage = null;
+            }
+        } else {
+            System.err.println("ERROR: Gambar peti terbuka tidak ditemukan di assets/chest-open.png."); // Diubah ke strip (-)
+            chestOpenImage = null;
+        }
 
         // Inisialisasi Player
         int playerDisplayWidth = originalFrameWidthPlayer * SCALE_FACTOR_PLAYER;
@@ -130,7 +148,7 @@ public class GameViewModel {
                 fullSpriteSheetPlayer
         );
 
-        // Inisialisasi SATU Orc (dari orc_attack.png sebagai sprite sheet)
+        // Inisialisasi SATU Orc
         int originalOrcFrameWidth = fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50;
         int totalOrcFrames = 6;
 
@@ -144,27 +162,31 @@ public class GameViewModel {
                 totalOrcFrames
         );
 
-        // Inisialisasi Coins (dari coin.png sebagai gambar tunggal)
+        // Inisialisasi Coins
         coins = new ArrayList<>();
-        // Asumsi ukuran koin tetap, misalnya 30x30 setelah scaling
-        int coinDisplayWidth = 30 * SCALE_FACTOR_ENEMY / 2; // Sesuaikan ukuran koin jika perlu
+        int coinDisplayWidth = 30 * SCALE_FACTOR_ENEMY / 2;
         int coinDisplayHeight = 30 * SCALE_FACTOR_ENEMY / 2;
 
         for (int i = 0; i < COIN_COUNT; i++) {
-            // Posisi acak untuk koin di bagian bawah
             int randomX = (int)(Math.random() * (gamePanelWidth - coinDisplayWidth));
             int randomY = (int)(gamePanelHeight * 0.7 + (Math.random() * (gamePanelHeight * 0.2)));
-            int initialVelocity = (i % 2 == 0) ? ENEMY_SPEED : -ENEMY_SPEED; // Bergantian arah
+            int initialVelocity = (i % 2 == 0) ? ENEMY_SPEED : -ENEMY_SPEED;
 
-            coins.add(new Coin( // Menggunakan Coin
+            coins.add(new Coin(
                     randomX,
                     randomY,
                     coinDisplayWidth,
                     coinDisplayHeight,
-                    coinImage, // Langsung gambar koin
+                    coinImage,
                     initialVelocity
             ));
         }
+
+        // Inisialisasi posisi dan ukuran Peti Harta Karun
+        chestDisplayWidth = 100; // Ukuran lebar tetap
+        chestDisplayHeight = 100; // Ukuran tinggi tetap
+        chestPosX = gamePanelWidth - chestDisplayWidth - 20; // Contoh: di kanan atas
+        chestPosY = 10; // Contoh: di kanan atas
 
         lastFrameTimePlayer = System.currentTimeMillis();
         mousePosition = new Point(0,0);
@@ -212,7 +234,7 @@ public class GameViewModel {
 
             if (distanceToOrc < LASSO_RANGE && distanceMouseToOrc < LASSO_GRAB_TOLERANCE) {
                 score += 100;
-                singleOrc = null;
+                singleOrc = null; // Orc hilang
             }
         }
 
@@ -227,7 +249,7 @@ public class GameViewModel {
 
             if (distanceToCoin < LASSO_RANGE && distanceMouseToCoin < LASSO_GRAB_TOLERANCE) {
                 score += 50;
-                iterator.remove();
+                iterator.remove(); // Koin hilang (berarti masuk ke peti)
             }
         }
     }
@@ -239,7 +261,7 @@ public class GameViewModel {
             singleOrc.updatePosition(gamePanelWidth);
         }
 
-        for (Coin coin : coins) { // Untuk setiap koin
+        for (Coin coin : coins) {
             coin.updatePosition(gamePanelWidth);
         }
 
@@ -275,10 +297,17 @@ public class GameViewModel {
     public int getPlayerVelocityX() { return player.getVelocityX(); }
 
     public Orc getSingleOrc() { return singleOrc; }
-    public List<Coin> getCoins() { return coins; } // Getter untuk koin
+    public List<Coin> getCoins() { return coins; }
 
     public boolean isLassoActive() { return isLassoActive; }
     public Point getMousePosition() { return mousePosition; }
 
     public int getScore() { return score; }
+
+    // Getters untuk Peti Harta Karun
+    public Image getChestOpenImage() { return chestOpenImage; }
+    public int getChestPosX() { return chestPosX; }
+    public int getChestPosY() { return chestPosY; }
+    public int getChestDisplayWidth() { return chestDisplayWidth; }
+    public int getChestDisplayHeight() { return chestDisplayHeight; }
 }

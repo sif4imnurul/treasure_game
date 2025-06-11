@@ -2,7 +2,7 @@ package view;
 
 import viewmodel.GameViewModel;
 import model.Orc;
-import model.Coin; // Import Coin
+import model.Coin;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -120,19 +120,30 @@ public class GameView extends JPanel implements ActionListener {
         }
 
         // Gambar Coins
-        List<Coin> coins = viewModel.getCoins(); // Menggunakan getCoins()
+        List<Coin> coins = viewModel.getCoins();
         for (Coin coin : coins) {
-            Image coinImage = coin.getImage(); // Menggunakan getImage()
+            Image coinImage = coin.getImage();
             if (coinImage != null) {
-                if (coin.getVelocityX() < 0) { // Jika koin bergerak ke kiri
+                if (coin.getVelocityX() < 0) {
                     g.drawImage(coinImage, coin.getPosX() + coin.getDisplayWidth(), coin.getPosY(), -coin.getDisplayWidth(), coin.getDisplayHeight(), this);
-                } else { // Jika koin bergerak ke kanan
+                } else {
                     g.drawImage(coinImage, coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight(), this);
                 }
             } else {
-                g.setColor(Color.YELLOW); // Warna default jika gambar tidak ada
+                g.setColor(Color.YELLOW);
                 g.fillRect(coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight());
             }
+        }
+
+        // Gambar peti harta karun
+        Image chestImage = viewModel.getChestOpenImage();
+        if (chestImage != null) {
+            g.drawImage(chestImage, viewModel.getChestPosX(), viewModel.getChestPosY(),
+                    viewModel.getChestDisplayWidth(), viewModel.getChestDisplayHeight(), this);
+        } else {
+            g.setColor(Color.BLUE); // Fallback warna jika gambar tidak ada
+            g.fillRect(viewModel.getChestPosX(), viewModel.getChestPosY(),
+                    viewModel.getChestDisplayWidth(), viewModel.getChestDisplayHeight());
         }
 
         // Gambar laso
