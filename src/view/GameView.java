@@ -1,93 +1,157 @@
 package view;
 
 import viewmodel.GameViewModel;
+import model.Orc;
+import model.Coin; // Import Coin
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.util.List;
 
 public class GameView extends JPanel implements ActionListener {
-    private GameViewModel viewModel; // ViewModel untuk data game
-    private Timer gameLoopTimer; // Timer untuk loop game
+    private GameViewModel viewModel;
+    private Timer gameLoopTimer;
 
-    private static final int PANEL_WIDTH = 1200; // Lebar panel game
-    private static final int PANEL_HEIGHT = 800; // Tinggi panel game
+    private static final int PANEL_WIDTH = 1200;
+    private static final int PANEL_HEIGHT = 800;
 
     public GameView(GameViewModel viewModel) {
-        this.viewModel = viewModel; // Inisialisasi ViewModel
+        this.viewModel = viewModel;
 
-        this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT)); // Atur ukuran panel
-        this.setFocusable(true); // Panel dapat menerima input keyboard
+        this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
+        this.setFocusable(true);
 
-        this.addKeyListener(new KeyAdapter() { // Tambahkan listener keyboard
+        this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                int key = e.getKeyCode(); // Dapatkan kode tombol
-                if (key == KeyEvent.VK_LEFT) { //
-                    viewModel.setPlayerMovementDirection(GameViewModel.LEFT); //
-                } else if (key == KeyEvent.VK_RIGHT) { //
-                    viewModel.setPlayerMovementDirection(GameViewModel.RIGHT); //
-                } else if (key == KeyEvent.VK_UP) { //
-                    viewModel.setPlayerMovementDirection(GameViewModel.UP); //
-                } else if (key == KeyEvent.VK_DOWN) { //
-                    viewModel.setPlayerMovementDirection(GameViewModel.DOWN); //
-                }
+                viewModel.setPlayerMovementDirection(e.getKeyCode(), true);
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                int key = e.getKeyCode(); // Dapatkan kode tombol
-                if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) { //
-                    viewModel.setPlayerMovementDirection(GameViewModel.STOP_HORIZONTAL); //
-                } else if (key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN) { //
-                    viewModel.setPlayerMovementDirection(GameViewModel.STOP_VERTICAL); //
+                viewModel.setPlayerMovementDirection(e.getKeyCode(), false);
+            }
+        });
+
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    viewModel.setLassoActive(true);
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    viewModel.setLassoActive(false);
                 }
             }
         });
 
-        gameLoopTimer = new Timer(15, this); // Timer untuk ~60 FPS (1000ms / 60)
-        gameLoopTimer.start(); // Mulai timer
+        this.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                viewModel.updateMousePosition(e.getX(), e.getY());
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                viewModel.updateMousePosition(e.getX(), e.getY());
+            }
+        });
+
+        gameLoopTimer = new Timer(15, this);
+        gameLoopTimer.start();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // Panggil implementasi JPanel
-        draw(g); // Panggil metode draw
+        super.paintComponent(g);
+        draw(g);
     }
 
     private void draw(Graphics g) {
         // Gambar latar belakang
-        Image backgroundImage = viewModel.getBackgroundImage(); //
-        if (backgroundImage != null) { //
-            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this); // Gambar latar belakang
+        Image backgroundImage = viewModel.getBackgroundImage();
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         } else {
-            g.setColor(Color.BLACK); // Jika gagal, gunakan latar hitam
-            g.fillRect(0, 0, getWidth(), getHeight()); //
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, getWidth(), getHeight());
         }
 
         // Gambar pemain
-        Image currentPlayerFrame = viewModel.getCurrentPlayerFrame(); // Frame pemain saat ini
-        int playerX = viewModel.getPlayerX(); // Posisi X pemain
-        int playerY = viewModel.getPlayerY(); // Posisi Y pemain
-        int playerDisplayWidth = viewModel.getPlayerDisplayWidth(); // Lebar tampilan pemain
-        int playerDisplayHeight = viewModel.getPlayerDisplayHeight(); // Tinggi tampilan pemain
-        int playerVelocityX = viewModel.getPlayerVelocityX(); // Kecepatan X pemain
+        Image currentPlayerFrame = viewModel.getCurrentPlayerFrame();
+        int playerX = viewModel.getPlayerX();
+        int playerY = viewModel.getPlayerY();
+        int playerDisplayWidth = viewModel.getPlayerDisplayWidth();
+        int playerDisplayHeight = viewModel.getPlayerDisplayHeight();
+        int playerVelocityX = viewModel.getPlayerVelocityX();
 
-        if (currentPlayerFrame != null) { // Jika frame pemain valid
-            if (playerVelocityX < 0) { // Jika bergerak ke kiri
-                // Gambar dibalik secara horizontal
+        if (currentPlayerFrame != null) {
+            if (playerVelocityX < 0) {
                 g.drawImage(currentPlayerFrame, playerX + playerDisplayWidth, playerY, -playerDisplayWidth, playerDisplayHeight, this);
-            } else { // Bergerak ke kanan atau diam
-                g.drawImage(currentPlayerFrame, playerX, playerY, playerDisplayWidth, playerDisplayHeight, this); // Gambar normal
+            } else {
+                g.drawImage(currentPlayerFrame, playerX, playerY, playerDisplayWidth, playerDisplayHeight, this);
             }
         }
+
+        // Gambar Orc tunggal (jika masih ada)
+        Orc singleOrc = viewModel.getSingleOrc();
+        if (singleOrc != null) {
+            Image orcFrame = singleOrc.getCurrentFrameImage();
+            if (orcFrame != null) {
+                if (singleOrc.getVelocityX() < 0) {
+                    g.drawImage(orcFrame, singleOrc.getPosX() + singleOrc.getDisplayWidth(), singleOrc.getPosY(), -singleOrc.getDisplayWidth(), singleOrc.getDisplayHeight(), this);
+                } else {
+                    g.drawImage(orcFrame, singleOrc.getPosX(), singleOrc.getPosY(), singleOrc.getDisplayWidth(), singleOrc.getDisplayHeight(), this);
+                }
+            } else {
+                g.setColor(Color.RED);
+                g.fillRect(singleOrc.getPosX(), singleOrc.getPosY(), singleOrc.getDisplayWidth(), singleOrc.getDisplayHeight());
+            }
+        }
+
+        // Gambar Coins
+        List<Coin> coins = viewModel.getCoins(); // Menggunakan getCoins()
+        for (Coin coin : coins) {
+            Image coinImage = coin.getImage(); // Menggunakan getImage()
+            if (coinImage != null) {
+                if (coin.getVelocityX() < 0) { // Jika koin bergerak ke kiri
+                    g.drawImage(coinImage, coin.getPosX() + coin.getDisplayWidth(), coin.getPosY(), -coin.getDisplayWidth(), coin.getDisplayHeight(), this);
+                } else { // Jika koin bergerak ke kanan
+                    g.drawImage(coinImage, coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight(), this);
+                }
+            } else {
+                g.setColor(Color.YELLOW); // Warna default jika gambar tidak ada
+                g.fillRect(coin.getPosX(), coin.getPosY(), coin.getDisplayWidth(), coin.getDisplayHeight());
+            }
+        }
+
+        // Gambar laso
+        if (viewModel.isLassoActive()) {
+            g.setColor(Color.WHITE);
+            g.drawLine(playerX + playerDisplayWidth / 2, playerY + playerDisplayHeight / 2,
+                    viewModel.getMousePosition().x, viewModel.getMousePosition().y);
+            g.fillOval(viewModel.getMousePosition().x - 5, viewModel.getMousePosition().y - 5, 10, 10);
+        }
+
+        // Gambar skor
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 24));
+        g.drawString("Score: " + viewModel.getScore(), 10, 30);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        viewModel.updateGame(); // Perbarui logika game
-        repaint(); // Gambar ulang panel
+        viewModel.updateGame();
+        repaint();
     }
 }

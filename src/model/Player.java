@@ -43,4 +43,11 @@ public class Player {
         this.posX += this.velocityX;
         this.posY += this.velocityY;
     }
+
+    // Metode baru untuk menghitung jarak ke titik lain
+    public double getDistanceTo(int targetX, int targetY) {
+        int playerCenterX = this.posX + this.displayWidth / 2;
+        int playerCenterY = this.posY + this.displayHeight / 2;
+        return Math.sqrt(Math.pow(targetX - playerCenterX, 2) + Math.pow(targetY - playerCenterY, 2));
+    }
 }
