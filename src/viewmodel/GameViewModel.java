@@ -9,147 +9,139 @@ import java.io.IOException;
 
 public class GameViewModel {
     private Player player;
-    private final int PLAYER_SPEED = 5; // Kecepatan gerakan pemain
+    private final int PLAYER_SPEED = 5;
 
-    private int gamePanelWidth; // Lebar panel game
-    private int gamePanelHeight; // Tinggi panel game
+    private int gamePanelWidth;
+    private int gamePanelHeight;
 
-    // Konstanta untuk arah gerakan
-    public static final int STOP_HORIZONTAL = 0; //
-    public static final int LEFT = 1; //
-    public static final int RIGHT = 2; //
-    public static final int STOP_VERTICAL = 3; //
-    public static final int UP = 4; //
-    public static final int DOWN = 5; //
+    public static final int STOP_HORIZONTAL = 0;
+    public static final int LEFT = 1;
+    public static final int RIGHT = 2;
+    public static final int STOP_VERTICAL = 3;
+    public static final int UP = 4;
+    public static final int DOWN = 5;
 
-    private BufferedImage fullSpriteSheet; // Sprite sheet penuh
-    private BufferedImage backgroundImage; // Gambar latar belakang
-    private int currentFrame = 0; // Frame animasi saat ini
-    private int originalFrameWidth; // Lebar frame asli
-    private int originalFrameHeight; // Tinggi frame asli
-    private int totalFrames; // Total frame dalam sprite sheet
-    private long lastFrameTime; // Waktu terakhir update frame
-    private final long FRAME_DELAY = 70; // Mengatur delay frame animasi ke 70ms (sekitar 14 FPS)
+    private BufferedImage fullSpriteSheet;
+    private BufferedImage backgroundImage;
+    private int currentFrame = 0;
+    private int originalFrameWidth;
+    private int originalFrameHeight;
+    private int totalFrames;
+    private long lastFrameTime;
+    private final long FRAME_DELAY = 70;
 
-    private final int SCALE_FACTOR = 4; // Faktor skala gambar
+    private final int SCALE_FACTOR = 5;
 
     public GameViewModel(int panelWidth, int panelHeight) {
-        this.gamePanelWidth = panelWidth; //
-        this.gamePanelHeight = panelHeight; //
+        this.gamePanelWidth = panelWidth;
+        this.gamePanelHeight = panelHeight;
 
-        // Memuat sprite sheet pemain
-        URL playerImageUrl = getClass().getClassLoader().getResource("assets/soldier-walk.png"); //
-        if (playerImageUrl != null) { //
-            try { //
-                fullSpriteSheet = ImageIO.read(playerImageUrl); //
-                System.out.println("Sprite sheet berhasil dimuat: " + playerImageUrl); //
-
-                // UBAH KEDUA BARIS INI DARI 9 MENJADI 8
-                originalFrameWidth = fullSpriteSheet.getWidth() / 8; // Lebar frame jika ada 8 frame
-                originalFrameHeight = fullSpriteSheet.getHeight(); // Tinggi frame
-                totalFrames = 8; // Total frame
-
-            } catch (IOException e) { //
-                System.err.println("ERROR: Gagal memuat sprite sheet: " + e.getMessage()); //
-                fullSpriteSheet = null; //
+        URL playerImageUrl = getClass().getClassLoader().getResource("assets/soldier-walk.png");
+        if (playerImageUrl != null) {
+            try {
+                fullSpriteSheet = ImageIO.read(playerImageUrl);
+                System.out.println("Sprite sheet berhasil dimuat: " + playerImageUrl);
+                originalFrameWidth = fullSpriteSheet.getWidth() / 8;
+                originalFrameHeight = fullSpriteSheet.getHeight();
+                totalFrames = 8;
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat sprite sheet: " + e.getMessage());
+                fullSpriteSheet = null;
             }
-        } else { //
-            System.err.println("ERROR: Sprite sheet tidak ditemukan di assets/soldier-walk.png."); //
-            fullSpriteSheet = null; //
+        } else {
+            System.err.println("ERROR: Sprite sheet tidak ditemukan di assets/soldier-walk.png.");
+            fullSpriteSheet = null;
         }
 
-        // Memuat gambar latar belakang
-        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background_cave.png"); //
-        if (backgroundImageUrl != null) { //
-            try { //
-                backgroundImage = ImageIO.read(backgroundImageUrl); //
-                System.out.println("Gambar latar belakang berhasil dimuat: " + backgroundImageUrl); //
-            } catch (IOException e) { //
-                System.err.println("ERROR: Gagal memuat gambar latar belakang: " + e.getMessage()); //
-                backgroundImage = null; //
+        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background_cave.png");
+        if (backgroundImageUrl != null) {
+            try {
+                backgroundImage = ImageIO.read(backgroundImageUrl);
+                System.out.println("Gambar latar belakang berhasil dimuat: " + backgroundImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat gambar latar belakang: " + e.getMessage());
+                backgroundImage = null;
             }
-        } else { //
-            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background_cave.png."); //
-            backgroundImage = null; //
+        } else {
+            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background_cave.png.");
+            backgroundImage = null;
         }
 
-
-        int playerDisplayWidth = originalFrameWidth * SCALE_FACTOR; // Lebar tampilan pemain
-        int playerDisplayHeight = originalFrameHeight * SCALE_FACTOR; // Tinggi tampilan pemain
+        int playerDisplayWidth = originalFrameWidth * SCALE_FACTOR;
+        int playerDisplayHeight = originalFrameHeight * SCALE_FACTOR;
 
         this.player = new Player(
-                panelWidth / 2 - (playerDisplayWidth / 2), // Posisi X awal di tengah
-                panelHeight / 2 - (playerDisplayHeight / 2), // Posisi Y awal di tengah
-                playerDisplayWidth, //
-                playerDisplayHeight, //
-                fullSpriteSheet //
+                panelWidth / 2 - (playerDisplayWidth / 2),
+                panelHeight / 2 - (playerDisplayHeight / 2),
+                playerDisplayWidth,
+                playerDisplayHeight,
+                fullSpriteSheet
         );
 
-        lastFrameTime = System.currentTimeMillis(); // Inisialisasi waktu frame terakhir
+        lastFrameTime = System.currentTimeMillis();
     }
 
     public void setPlayerMovementDirection(int direction) {
-        switch (direction) { //
-            case STOP_HORIZONTAL: //
-                player.setVelocityX(0); // Hentikan gerakan X
-                if (player.getVelocityY() == 0) { // Jika tidak bergerak vertikal juga
-                    currentFrame = 0; // Kembali ke frame idle
+        switch (direction) {
+            case STOP_HORIZONTAL:
+                player.setVelocityX(0);
+                if (player.getVelocityY() == 0) {
+                    currentFrame = 0;
                 }
                 break;
-            case LEFT: //
-                player.setVelocityX(-PLAYER_SPEED); // Gerak kiri
+            case LEFT:
+                player.setVelocityX(-PLAYER_SPEED);
                 break;
-            case RIGHT: //
-                player.setVelocityX(PLAYER_SPEED); // Gerak kanan
+            case RIGHT:
+                player.setVelocityX(PLAYER_SPEED);
                 break;
-            case STOP_VERTICAL: //
-                player.setVelocityY(0); // Hentikan gerakan Y
-                if (player.getVelocityX() == 0) { // Jika tidak bergerak horizontal juga
-                    currentFrame = 0; // Kembali ke frame idle
+            case STOP_VERTICAL:
+                player.setVelocityY(0);
+                if (player.getVelocityX() == 0) {
+                    currentFrame = 0;
                 }
                 break;
-            case UP: //
-                player.setVelocityY(-PLAYER_SPEED); // Gerak atas
+            case UP:
+                player.setVelocityY(-PLAYER_SPEED);
                 break;
-            case DOWN: //
-                player.setVelocityY(PLAYER_SPEED); // Gerak bawah
+            case DOWN:
+                player.setVelocityY(PLAYER_SPEED);
                 break;
         }
     }
 
     public void updateGame() {
-        player.updatePosition(); // Perbarui posisi pemain
+        player.updatePosition();
 
-        // Tidak ada batasan posisi, pemain bisa bergerak bebas di luar frame
+        // Removed boundary checks here
+        // The player can now move freely beyond the panel dimensions.
 
-        long currentTime = System.currentTimeMillis(); // Waktu saat ini
-        if (currentTime - lastFrameTime > FRAME_DELAY) { // Jika sudah waktunya update frame
-            if (player.getVelocityX() != 0 || player.getVelocityY() != 0) { // Jika pemain bergerak
-                currentFrame = (currentFrame + 1) % totalFrames; // Lanjut animasi frame berikutnya
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastFrameTime > FRAME_DELAY) {
+            if (player.getVelocityX() != 0 || player.getVelocityY() != 0) {
+                currentFrame = (currentFrame + 1) % totalFrames;
             } else {
-                currentFrame = 0; // Jika diam, tampilkan frame pertama (idle)
+                currentFrame = 0;
             }
-            lastFrameTime = currentTime; // Perbarui waktu frame terakhir
+            lastFrameTime = currentTime;
         }
     }
 
     public Image getCurrentPlayerFrame() {
-        if (fullSpriteSheet == null || originalFrameWidth == 0 || originalFrameHeight == 0) { // Cek apakah sprite sheet valid
-            return null; //
+        if (fullSpriteSheet == null || originalFrameWidth == 0 || originalFrameHeight == 0) {
+            return null;
         }
-        int sourceX = currentFrame * originalFrameWidth; // Hitung posisi X frame saat ini
-        return fullSpriteSheet.getSubimage(sourceX, 0, originalFrameWidth, originalFrameHeight); // Ambil sub-gambar frame
+        int sourceX = currentFrame * originalFrameWidth;
+        return fullSpriteSheet.getSubimage(sourceX, 0, originalFrameWidth, originalFrameHeight);
     }
 
-    // Getter untuk gambar latar belakang
     public Image getBackgroundImage() {
-        return backgroundImage; //
+        return backgroundImage;
     }
 
-    // Getter untuk properti pemain
-    public int getPlayerX() { return player.getPosX(); } //
-    public int getPlayerY() { return player.getPosY(); } //
-    public int getPlayerDisplayWidth() { return player.getDisplayWidth(); } //
-    public int getPlayerDisplayHeight() { return player.getDisplayHeight(); } //
-    public int getPlayerVelocityX() { return player.getVelocityX(); } //
+    public int getPlayerX() { return player.getPosX(); }
+    public int getPlayerY() { return player.getPosY(); }
+    public int getPlayerDisplayWidth() { return player.getDisplayWidth(); }
+    public int getPlayerDisplayHeight() { return player.getDisplayHeight(); }
+    public int getPlayerVelocityX() { return player.getVelocityX(); }
 }
