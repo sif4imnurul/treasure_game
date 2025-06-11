@@ -18,11 +18,11 @@ public class GameView extends JPanel implements ActionListener {
     public GameView(GameViewModel viewModel) {
         this.viewModel = viewModel;
 
-        this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT)); // Mengatur ukuran panel
-        this.setBackground(Color.BLACK); // Mengatur warna latar belakang
-        this.setFocusable(true); // Memungkinkan panel menerima input keyboard
+        this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
+        // Latar belakang sekarang akan digambar oleh gambar, bukan warna solid
+        // this.setBackground(Color.BLACK); // Dihapus karena akan diganti dengan gambar latar belakang
+        this.setFocusable(true);
 
-        // Menambahkan KeyListener untuk menangani input keyboard
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -49,30 +49,48 @@ public class GameView extends JPanel implements ActionListener {
             }
         });
 
-        // Mengatur game loop timer (sekitar 60 FPS)
         gameLoopTimer = new Timer(16, this); // 1000ms / 60fps = ~16ms per frame
-        gameLoopTimer.start(); // Memulai timer
+        gameLoopTimer.start();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // Panggil implementasi superclass
-        draw(g); // Panggil metode draw untuk menggambar elemen game
+        super.paintComponent(g);
+        draw(g);
     }
 
     private void draw(Graphics g) {
-        // Menggambar frame pemain saat ini dengan ukuran yang diskalakan
-        g.drawImage(viewModel.getCurrentPlayerFrame(), // Mendapatkan frame animasi saat ini
-                viewModel.getPlayerX(), // Posisi X pemain di layar
-                viewModel.getPlayerY(), // Posisi Y pemain di layar
-                viewModel.getPlayerDisplayWidth(), // Lebar tampilan pemain (setelah diskalakan)
-                viewModel.getPlayerDisplayHeight(), // Tinggi tampilan pemain (setelah diskalakan)
-                this);
+        // 1. Gambar latar belakang terlebih dahulu
+        Image backgroundImage = viewModel.getBackgroundImage();
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        } else {
+            // Jika gambar latar belakang gagal dimuat, fallback ke latar belakang hitam
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, getWidth(), getHeight());
+        }
+
+        // 2. Gambar pemain
+        // Mempertimbangkan arah gerakan untuk mirroring (flipping)
+        Image currentPlayerFrame = viewModel.getCurrentPlayerFrame();
+        int playerX = viewModel.getPlayerX();
+        int playerY = viewModel.getPlayerY();
+        int playerDisplayWidth = viewModel.getPlayerDisplayWidth();
+        int playerDisplayHeight = viewModel.getPlayerDisplayHeight();
+        int playerVelocityX = viewModel.getPlayerVelocityX(); // Dapatkan kecepatan X dari ViewModel
+
+        if (currentPlayerFrame != null) {
+            if (playerVelocityX < 0) { // Jika bergerak ke kiri, balik gambar
+                g.drawImage(currentPlayerFrame, playerX + playerDisplayWidth, playerY, -playerDisplayWidth, playerDisplayHeight, this);
+            } else { // Bergerak ke kanan atau diam, gambar normal
+                g.drawImage(currentPlayerFrame, playerX, playerY, playerDisplayWidth, playerDisplayHeight, this);
+            }
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        viewModel.updateGame(); // Perbarui status game
-        repaint(); // Minta panel untuk digambar ulang (memanggil paintComponent)
+        viewModel.updateGame();
+        repaint();
     }
 }

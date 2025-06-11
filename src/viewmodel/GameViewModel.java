@@ -3,9 +3,9 @@ package viewmodel;
 import model.Player;
 import java.awt.Image;
 import java.net.URL;
-import java.awt.image.BufferedImage; // Untuk bekerja dengan sub-gambar (frame)
-import javax.imageio.ImageIO; // Untuk membaca gambar dari file
-import java.io.IOException; // Untuk menangani kesalahan I/O
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 
 public class GameViewModel {
     private Player player;
@@ -22,41 +22,32 @@ public class GameViewModel {
     public static final int UP = 4;
     public static final int DOWN = 5;
 
-    // --- Variabel baru untuk animasi dan penskalaan ---
-    private BufferedImage fullSpriteSheet; // Menyimpan seluruh gambar sprite sheet
-    private int currentFrame = 0; // Indeks frame yang sedang ditampilkan
-    private int originalFrameWidth; // Lebar asli satu frame sprite (misal 20px)
-    private int originalFrameHeight; // Tinggi asli satu frame sprite (misal 30px)
-    private int totalFrames; // Jumlah total frame dalam animasi
-    private long lastFrameTime; // Waktu terakhir frame diperbarui
-    private final long FRAME_DELAY = 100; // Penundaan (ms) antar frame untuk kecepatan animasi (ubah sesuai keinginan)
+    private BufferedImage fullSpriteSheet;
+    private BufferedImage backgroundImage; // Tambah variabel untuk gambar latar belakang
+    private int currentFrame = 0;
+    private int originalFrameWidth;
+    private int originalFrameHeight;
+    private int totalFrames;
+    private long lastFrameTime;
+    private final long FRAME_DELAY = 70; // Mengurangi delay untuk animasi lebih halus (misal 70ms)
 
-    private final int SCALE_FACTOR = 4; // Faktor penskalaan (misal 2x, 3x, 4x)
-    // --- Akhir variabel baru ---
+    private final int SCALE_FACTOR = 4;
 
     public GameViewModel(int panelWidth, int panelHeight) {
         this.gamePanelWidth = panelWidth;
         this.gamePanelHeight = panelHeight;
 
-        // Mendapatkan URL ke gambar sprite sheet Anda
-        // Pastikan 'soldier-walk.png' ada di folder 'assets' (src/main/resources/assets/)
+        // Memuat sprite sheet pemain
         URL playerImageUrl = getClass().getClassLoader().getResource("assets/soldier-walk.png");
-
         if (playerImageUrl != null) {
             try {
-                // Membaca seluruh sprite sheet sebagai BufferedImage
                 fullSpriteSheet = ImageIO.read(playerImageUrl);
                 System.out.println("Sprite sheet berhasil dimuat dari: " + playerImageUrl);
 
-                // --- Tentukan dimensi sprite asli dan total frame ---
-                // PENTING: Anda HARUS menyesuaikan nilai-nilai ini berdasarkan gambar
-                // 'soldier-walk.png' Anda yang sebenarnya.
-                // Dari gambar yang Anda berikan, asumsi lebar satu sprite sekitar 20px
-                // dan tinggi sekitar 30px. Dan ada 9 frame total.
-                originalFrameWidth = fullSpriteSheet.getWidth() / 9; // Total lebar gambar dibagi jumlah frame
-                originalFrameHeight = fullSpriteSheet.getHeight(); // Jika semua frame berada dalam satu baris
-                totalFrames = 9; // Total jumlah frame dalam sprite sheet Anda
-                // --- Akhir penentuan dimensi sprite ---
+                // Sesuaikan ini dengan sprite sheet Anda yang sebenarnya
+                originalFrameWidth = fullSpriteSheet.getWidth() / 9; // Jika ada 9 frame
+                originalFrameHeight = fullSpriteSheet.getHeight();
+                totalFrames = 9;
 
             } catch (IOException e) {
                 System.err.println("ERROR: Gagal memuat sprite sheet: " + e.getMessage());
@@ -67,30 +58,44 @@ public class GameViewModel {
             fullSpriteSheet = null;
         }
 
-        // Hitung lebar dan tinggi tampilan pemain setelah diskalakan
+        // Memuat gambar latar belakang
+        URL backgroundImageUrl = getClass().getClassLoader().getResource("assets/background_cave.png"); // Asumsi nama file: background.png
+        if (backgroundImageUrl != null) {
+            try {
+                backgroundImage = ImageIO.read(backgroundImageUrl);
+                System.out.println("Gambar latar belakang berhasil dimuat dari: " + backgroundImageUrl);
+            } catch (IOException e) {
+                System.err.println("ERROR: Gagal memuat gambar latar belakang: " + e.getMessage());
+                backgroundImage = null;
+            }
+        } else {
+            System.err.println("ERROR: Gambar latar belakang tidak ditemukan di assets/background_cave.png. Pastikan jalur dan penempatan file benar.");
+            backgroundImage = null;
+        }
+
+
         int playerDisplayWidth = originalFrameWidth * SCALE_FACTOR;
         int playerDisplayHeight = originalFrameHeight * SCALE_FACTOR;
 
-        // Menginisialisasi objek Player
-        // Ukuran lebar dan tinggi pemain sekarang adalah ukuran yang diskalakan
         this.player = new Player(
-                panelWidth / 2 - (playerDisplayWidth / 2), // Posisikan pemain di tengah horizontal
-                panelHeight / 2 - (playerDisplayHeight / 2), // Posisikan pemain di tengah vertikal
-                playerDisplayWidth, // Lebar tampilan pemain (sudah diskalakan)
-                playerDisplayHeight, // Tinggi tampilan pemain (sudah diskalakan)
-                fullSpriteSheet // Player object akan menyimpan seluruh sprite sheet
+                panelWidth / 2 - (playerDisplayWidth / 2),
+                panelHeight / 2 - (playerDisplayHeight / 2),
+                playerDisplayWidth,
+                playerDisplayHeight,
+                fullSpriteSheet
         );
 
-        lastFrameTime = System.currentTimeMillis(); // Inisialisasi waktu frame terakhir
+        lastFrameTime = System.currentTimeMillis();
     }
 
-    // Mengatur arah gerakan pemain berdasarkan input keyboard
     public void setPlayerMovementDirection(int direction) {
         switch (direction) {
             case STOP_HORIZONTAL:
                 player.setVelocityX(0);
-                // Ketika berhenti, bisa diatur ke frame idle (misal frame 0)
-                // currentFrame = 0;
+                // Ketika berhenti horizontal, reset animasi ke frame idle (frame 0)
+                if (player.getVelocityY() == 0) { // Hanya jika tidak bergerak vertikal juga
+                    currentFrame = 0;
+                }
                 break;
             case LEFT:
                 player.setVelocityX(-PLAYER_SPEED);
@@ -100,8 +105,10 @@ public class GameViewModel {
                 break;
             case STOP_VERTICAL:
                 player.setVelocityY(0);
-                // Ketika berhenti, bisa diatur ke frame idle (misal frame 0)
-                // currentFrame = 0;
+                // Ketika berhenti vertikal, reset animasi ke frame idle (frame 0)
+                if (player.getVelocityX() == 0) { // Hanya jika tidak bergerak horizontal juga
+                    currentFrame = 0;
+                }
                 break;
             case UP:
                 player.setVelocityY(-PLAYER_SPEED);
@@ -112,51 +119,47 @@ public class GameViewModel {
         }
     }
 
-    // Memperbarui logika game, termasuk posisi pemain dan animasi
     public void updateGame() {
-        player.updatePosition(); // Perbarui posisi pemain
+        player.updatePosition();
 
-        // Batasi posisi pemain agar tidak keluar dari batas panel
         int newX = player.getPosX();
         int newY = player.getPosY();
 
-        // Menggunakan getDisplayWidth/Height untuk batasan agar sesuai ukuran tampilan
         newX = Math.max(0, Math.min(newX, gamePanelWidth - player.getDisplayWidth()));
         newY = Math.max(0, Math.min(newY, gamePanelHeight - player.getDisplayHeight()));
 
         player.setPosX(newX);
         player.setPosY(newY);
 
-        // --- Logika pembaruan animasi ---
         long currentTime = System.currentTimeMillis();
-        // Jika sudah waktunya untuk mengganti frame
         if (currentTime - lastFrameTime > FRAME_DELAY) {
-            // Animasi hanya berjalan jika pemain bergerak
             if (player.getVelocityX() != 0 || player.getVelocityY() != 0) {
-                currentFrame = (currentFrame + 1) % totalFrames; // Lanjut ke frame berikutnya, putar kembali ke awal jika sudah habis
+                currentFrame = (currentFrame + 1) % totalFrames;
             } else {
                 currentFrame = 0; // Jika tidak bergerak, tampilkan frame pertama (idle)
             }
-            lastFrameTime = currentTime; // Perbarui waktu frame terakhir
+            lastFrameTime = currentTime;
         }
-        // --- Akhir logika pembaruan animasi ---
     }
 
-    // --- Metode baru untuk mendapatkan frame pemain saat ini untuk digambar ---
     public Image getCurrentPlayerFrame() {
         if (fullSpriteSheet == null || originalFrameWidth == 0 || originalFrameHeight == 0) {
-            return null; // Pastikan sprite sheet sudah dimuat dan dimensi valid
+            return null;
         }
-        // Hitung posisi X dari frame saat ini dalam sprite sheet
         int sourceX = currentFrame * originalFrameWidth;
-        // Mengambil sub-gambar (frame) dari sprite sheet penuh
+        // Mengembalikan sub-gambar (frame) dari sprite sheet penuh
         return fullSpriteSheet.getSubimage(sourceX, 0, originalFrameWidth, originalFrameHeight);
     }
-    // --- Akhir metode baru ---
+
+    // Getter baru untuk gambar latar belakang
+    public Image getBackgroundImage() {
+        return backgroundImage;
+    }
 
     // --- Getter untuk properti pemain (digunakan oleh GameView) ---
     public int getPlayerX() { return player.getPosX(); }
     public int getPlayerY() { return player.getPosY(); }
-    public int getPlayerDisplayWidth() { return player.getDisplayWidth(); } // Mengembalikan lebar tampilan pemain (setelah diskalakan)
-    public int getPlayerDisplayHeight() { return player.getDisplayHeight(); } // Mengembalikan tinggi tampilan pemain (setelah diskalakan)
+    public int getPlayerDisplayWidth() { return player.getDisplayWidth(); }
+    public int getPlayerDisplayHeight() { return player.getDisplayHeight(); }
+    public int getPlayerVelocityX() { return player.getVelocityX(); } // Tambahkan getter untuk velocityX
 }
