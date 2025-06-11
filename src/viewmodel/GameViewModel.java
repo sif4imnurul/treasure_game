@@ -497,8 +497,11 @@ public class GameViewModel {
         if (isGameOver) return;
 
         if (System.currentTimeMillis() - gameStartTime >= gameDuration) {
-            isGameOver = true;
+            // CALL setGameOver(true) HERE TO ENSURE saveGameResult IS CALLED
+            setGameOver(true);
             System.out.println("game over! waktu habis. skor akhir: " + score);
+            // No need to return here, setGameOver(true) will set isGameOver to true,
+            // so on the next update loop, it will return immediately.
         }
 
         spawnEntity();
@@ -607,7 +610,7 @@ public class GameViewModel {
         } catch (SQLException | RuntimeException e) {
             System.err.println("gagal menyimpan/mengupdate skor dan count: " + e.getMessage());
             // It's highly recommended to add a more detailed error message here,
-            // e.g., e.printStackTrace() to see the full stack trace for debugging.
+            // e.printStackTrace() to see the full stack trace for debugging.
             e.printStackTrace();
         }
     }
