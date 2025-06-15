@@ -1,6 +1,6 @@
-import view.GameView;
 import view.StartView;
 import viewmodel.GameViewModel;
+import sound.SoundManager; // <-- IMPORT
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import java.awt.Dimension;
@@ -17,8 +17,17 @@ public class Main {
             frame.setLocationRelativeTo(null);
             frame.setResizable(false);
 
-            GameViewModel viewModel = new GameViewModel(FRAME_WIDTH, FRAME_HEIGHT);
+            // 1. Buat instance SoundManager di sini.
+            SoundManager soundManager = new SoundManager();
 
+            // 2. Langsung mainkan musik latar.
+            // Musik akan mulai saat aplikasi pertama kali dijalankan.
+            soundManager.playBackgroundMusic();
+
+            // 3. Teruskan instance soundManager ke GameViewModel.
+            GameViewModel viewModel = new GameViewModel(FRAME_WIDTH, FRAME_HEIGHT, soundManager);
+
+            // StartView akan ditampilkan dengan musik yang sudah berputar.
             StartView startView = new StartView(viewModel, frame);
             frame.add(startView);
 
