@@ -161,8 +161,8 @@ public class GameView extends JPanel implements ActionListener {
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 24));
-        g.drawString("Score: " + viewModel.getScore(), 10, 30);
-        g.drawString("Harta Karun Terkumpul: " + viewModel.getTreasuresCollectedCount(), 10, 60);
+        g.drawString("Score: " + viewModel.getScore(), 10, 30); // Score at Y=30
+        g.drawString("Harta Karun Terkumpul: " + viewModel.getTreasuresCollectedCount(), 10, 60); // Count at Y=60
 
         long timeLeftMillis = viewModel.getTimeLeft();
         long secondsLeft = timeLeftMillis / 1000;
@@ -181,7 +181,8 @@ public class GameView extends JPanel implements ActionListener {
             parentFrame.repaint();
             startView.requestFocusInWindow();
         }
-        g.drawString(timeString, 10, 60);
+        // Change the Y-coordinate for the time string to avoid overlap
+        g.drawString(timeString, 10, 90); // Adjusted Y to 90
 
         Image chestImage = viewModel.getChestOpenImage();
         if (chestImage != null) {
