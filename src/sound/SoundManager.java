@@ -10,7 +10,6 @@ public class SoundManager {
     private Clip coinSound, hitSound, gameOverSound, backgroundMusic;
 
     public SoundManager() {
-        // Muat semua file suara .wav saat kelas ini dibuat
         coinSound = loadSound("/assets/coin.wav");
         hitSound = loadSound("/assets/hit.wav");
         gameOverSound = loadSound("/assets/game-over.wav");
@@ -19,15 +18,12 @@ public class SoundManager {
 
     private Clip loadSound(String path) {
         try {
-            // Menggunakan getResourceAsStream untuk memuat dari folder resources
-            // Ini adalah cara yang paling andal untuk memastikan file ditemukan
             InputStream audioSrc = SoundManager.class.getResourceAsStream(path);
             if (audioSrc == null) {
-                System.err.println("File suara tidak ditemukan di path: " + path);
+                // System.err.println("File suara tidak ditemukan di path: " + path);
                 return null;
             }
 
-            // Bungkus dengan BufferedInputStream untuk performa yang lebih baik
             InputStream bufferedIn = new BufferedInputStream(audioSrc);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(bufferedIn);
 
@@ -35,7 +31,7 @@ public class SoundManager {
             clip.open(audioStream);
             return clip;
         } catch (Exception e) {
-            System.err.println("Gagal memuat suara dari path: " + path);
+            // System.err.println("Gagal memuat suara dari path: " + path);
             e.printStackTrace();
             return null;
         }

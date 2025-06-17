@@ -3,7 +3,7 @@ package model;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-public class Treasure { // Renamed from Coin to Treasure
+public class Treasure {
     private int posX;
     private int posY;
     private int displayWidth;
@@ -13,7 +13,7 @@ public class Treasure { // Renamed from Coin to Treasure
     private boolean isCollected;
     private int targetX;
     private int targetY;
-    private int value; // New attribute for treasure value
+    private int value;
 
     public Treasure(int posX, int posY, int displayWidth, int displayHeight, BufferedImage image, int initialVelocityX, int value) {
         this.posX = posX;
@@ -23,9 +23,9 @@ public class Treasure { // Renamed from Coin to Treasure
         this.image = image;
         this.velocityX = initialVelocityX;
         this.isCollected = false;
-        this.targetX = 0; // Default, will be set when collected
-        this.targetY = 0; // Default, will be set when collected
-        this.value = value; // Initialize value
+        this.targetX = 0;
+        this.targetY = 0;
+        this.value = value;
     }
 
     public int getPosX() { return posX; }
@@ -37,7 +37,7 @@ public class Treasure { // Renamed from Coin to Treasure
     public boolean isCollected() { return isCollected; }
     public int getTargetX() { return targetX; }
     public int getTargetY() { return targetY; }
-    public int getValue() { return value; } // Getter for value
+    public int getValue() { return value; }
 
 
     public void setPosX(int x) { this.posX = x; }
@@ -49,5 +49,5 @@ public class Treasure { // Renamed from Coin to Treasure
     public void setCollected(boolean collected) { this.isCollected = collected; }
     public void setTargetX(int targetX) { this.targetX = targetX; }
     public void setTargetY(int targetY) { this.targetY = targetY; }
-    public void setValue(int value) { this.value = value; } // Setter for value
+    public void setValue(int value) { this.value = value; }
 }

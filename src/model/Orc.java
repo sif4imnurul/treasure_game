@@ -13,7 +13,7 @@ public class Orc {
     private int originalFrameWidth;
     private int totalFrames;
     private long lastFrameTime;
-    private final long FRAME_DELAY = 100;
+    private final long FrameDelay = 100;
 
     public Orc(int posX, int posY, int displayWidth, int displayHeight, BufferedImage fullSpriteSheet, int initialVelocityX, int originalFrameWidth, int totalFrames) {
         this.posX = posX;
@@ -38,7 +38,7 @@ public class Orc {
     public int getOriginalFrameWidth() { return originalFrameWidth; }
     public int getTotalFrames() { return totalFrames; }
     public long getLastFrameTime() { return lastFrameTime; }
-    public long getFrameDelay() { return FRAME_DELAY; }
+    public long getFrameDelay() { return FrameDelay; }
 
     public void setPosX(int x) { this.posX = x; }
     public void setPosY(int y) { this.posY = y; }

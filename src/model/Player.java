@@ -1,14 +1,14 @@
 package model;
 
 import java.awt.Image;
-import java.awt.image.BufferedImage; // Changed to BufferedImage for sprite sheet
+import java.awt.image.BufferedImage;
 
 public class Player {
     private int posX;
     private int posY;
     private int displayWidth;
     private int displayHeight;
-    private BufferedImage image; // Changed to BufferedImage
+    private BufferedImage image; 
     private int velocityX;
     private int velocityY;
 
