@@ -1,6 +1,11 @@
+
+// Saya [nama] mengerjakan evaluasi Tugas Masa Depan dalam mata kuliah 
+// Desain dan Pemrograman Berorientasi Objek untuk keberkahanNya maka saya 
+// tidak melakukan kecurangan seperti yang telah dispesifikasikan. Aamiin. 
+
 import view.StartView;
 import viewmodel.GameViewModel;
-import sound.SoundManager; // <-- IMPORT
+import sound.SoundManager;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import java.awt.Dimension;
