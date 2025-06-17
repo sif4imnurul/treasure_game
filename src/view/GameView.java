@@ -3,7 +3,7 @@ package view;
 import model.Player;
 import viewmodel.GameViewModel;
 import model.Orc;
-import model.Treasure; // Changed from Coin to Treasure
+import model.Treasure;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -33,13 +33,11 @@ public class GameView extends JPanel implements ActionListener {
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                // If Spacebar is pressed, stop the game and return to StartView
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    if (!viewModel.isGameOver()) { // Only do this if the game isn't already over
+                    if (!viewModel.apaGameSelesai()) {
                         gameLoopTimer.stop();
-                        viewModel.setGameOver(true); // Set game over explicitly, this will save the score
+                        viewModel.aturGameOver(true);
 
-                        // Navigate back to StartView
                         parentFrame.getContentPane().removeAll();
                         StartView startView = new StartView(viewModel, parentFrame);
                         parentFrame.add(startView);
@@ -48,13 +46,13 @@ public class GameView extends JPanel implements ActionListener {
                         startView.requestFocusInWindow();
                     }
                 } else {
-                    viewModel.setPlayerMovementDirection(e.getKeyCode(), true);
+                    viewModel.aturGerakPemain(e.getKeyCode(), true);
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                viewModel.setPlayerMovementDirection(e.getKeyCode(), false);
+                viewModel.aturGerakPemain(e.getKeyCode(), false);
             }
         });
 
@@ -62,14 +60,14 @@ public class GameView extends JPanel implements ActionListener {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    viewModel.setLassoActive(true);
+                    viewModel.aturLasoAktif(true);
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    viewModel.setLassoActive(false);
+                    viewModel.aturLasoAktif(false);
                 }
             }
         });
@@ -77,12 +75,12 @@ public class GameView extends JPanel implements ActionListener {
         this.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                viewModel.updateMousePosition(e.getX(), e.getY());
+                viewModel.perbaruiPosisiMouse(e.getX(), e.getY());
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                viewModel.updateMousePosition(e.getX(), e.getY());
+                viewModel.perbaruiPosisiMouse(e.getX(), e.getY());
             }
         });
 
@@ -99,7 +97,7 @@ public class GameView extends JPanel implements ActionListener {
     }
 
     private void draw(Graphics g) {
-        Image backgroundImage = viewModel.getBackgroundImage();
+        Image backgroundImage = viewModel.getGambarLatar();
         if (backgroundImage != null) {
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         } else {
@@ -107,15 +105,14 @@ public class GameView extends JPanel implements ActionListener {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        Image currentPlayerFrame = viewModel.getCurrentPlayerFrame();
-        int playerX = viewModel.getPlayerX();
-        int playerY = viewModel.getPlayerY();
-        int playerDisplayWidth = viewModel.getPlayerDisplayWidth();
-        int playerDisplayHeight = viewModel.getPlayerDisplayHeight();
-        int playerVelocityX = viewModel.getPlayerVelocityX();
+        Image currentPlayerFrame = viewModel.dapetinFramePemainSekarang();
+        int playerX = viewModel.getXPemain();
+        int playerY = viewModel.getYPemain();
+        int playerDisplayWidth = viewModel.getLebarPemain();
+        int playerDisplayHeight = viewModel.getTinggiPemain();
+        int playerVelocityX = viewModel.getKecepatanXPemain();
 
         if (currentPlayerFrame != null) {
-            // Flip image horizontally if player is moving left
             if (playerVelocityX < 0) {
                 g.drawImage(currentPlayerFrame, playerX + playerDisplayWidth, playerY, -playerDisplayWidth, playerDisplayHeight, this);
             } else {
@@ -123,19 +120,17 @@ public class GameView extends JPanel implements ActionListener {
             }
         }
 
-        List<Orc> orcs = viewModel.getOrcs();
+        List<Orc> orcs = viewModel.getParaOrc();
         for (Orc orc : orcs) {
             Image orcFrame = null;
             if (orc.getFullSpriteSheet() != null && orc.getOriginalFrameWidth() != 0) {
                 int sourceX = orc.getCurrentFrame() * orc.getOriginalFrameWidth();
-                // Ensure the subimage selection is within bounds
                 if (sourceX + orc.getOriginalFrameWidth() <= orc.getFullSpriteSheet().getWidth()) {
                     orcFrame = orc.getFullSpriteSheet().getSubimage(sourceX, 0, orc.getOriginalFrameWidth(), orc.getFullSpriteSheet().getHeight());
                 }
             }
 
             if (orcFrame != null) {
-                // Flip image horizontally if orc is moving left
                 if (orc.getVelocityX() < 0) {
                     g.drawImage(orcFrame, orc.getPosX() + orc.getDisplayWidth(), orc.getPosY(), -orc.getDisplayWidth(), orc.getDisplayHeight(), this);
                 } else {
@@ -147,9 +142,8 @@ public class GameView extends JPanel implements ActionListener {
             }
         }
 
-        // Draw Treasures (formerly Coins)
-        List<Treasure> treasures = viewModel.getTreasures(); // Changed from getCoins()
-        for (Treasure treasure : treasures) { // Changed from Coin
+        List<Treasure> treasures = viewModel.getHartaKarun();
+        for (Treasure treasure : treasures) {
             Image treasureImage = treasure.getImage();
             if (treasureImage != null) {
                 g.drawImage(treasureImage, treasure.getPosX(), treasure.getPosY(), treasure.getDisplayWidth(), treasure.getDisplayHeight(), this);
@@ -160,20 +154,19 @@ public class GameView extends JPanel implements ActionListener {
         }
 
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 24));
-        g.drawString("Score: " + viewModel.getScore(), 10, 30); // Score at Y=30
-        g.drawString("Harta Karun Terkumpul: " + viewModel.getTreasuresCollectedCount(), 10, 60); // Count at Y=60
+        g.setFont(new Font("Verdana", Font.BOLD, 24));
+        g.drawString("Score: " + viewModel.getSkor(), 10, 30);
+        g.drawString("Harta Karun Terkumpul: " + viewModel.getJumlahHartaTerkumpul(), 10, 60);
 
-        long timeLeftMillis = viewModel.getTimeLeft();
+        long timeLeftMillis = viewModel.getSisaWaktu();
         long secondsLeft = timeLeftMillis / 1000;
         long millisecondsLeft = timeLeftMillis % 1000;
 
         String timeString = String.format("Time: %d.%03d", secondsLeft, millisecondsLeft);
-        if (viewModel.isGameOver()) {
+        if (viewModel.apaGameSelesai()) {
             timeString = "Time: 0.000 (Game Over!)";
-            gameLoopTimer.stop(); // Stop the game loop when game is over
+            gameLoopTimer.stop();
 
-            // Immediately navigate back to StartView when game is over
             parentFrame.getContentPane().removeAll();
             StartView startView = new StartView(viewModel, parentFrame);
             parentFrame.add(startView);
@@ -181,35 +174,33 @@ public class GameView extends JPanel implements ActionListener {
             parentFrame.repaint();
             startView.requestFocusInWindow();
         }
-        // Change the Y-coordinate for the time string to avoid overlap
-        g.drawString(timeString, 10, 90); // Adjusted Y to 90
+        g.drawString(timeString, 10, 90);
 
-        Image chestImage = viewModel.getChestOpenImage();
+        Image chestImage = viewModel.getGambarPeti();
         if (chestImage != null) {
-            g.drawImage(chestImage, viewModel.getChestPosX(), viewModel.getChestPosY(),
-                    viewModel.getChestDisplayWidth(), viewModel.getChestDisplayHeight(), this);
+            g.drawImage(chestImage, viewModel.getXPeti(), viewModel.getYPeti(),
+                    viewModel.getLebarPeti(), viewModel.getTinggiPeti(), this);
         } else {
             g.setColor(Color.BLUE);
-            g.fillRect(viewModel.getChestPosX(), viewModel.getChestPosY(),
-                    viewModel.getChestDisplayWidth(), viewModel.getChestDisplayHeight());
+            g.fillRect(viewModel.getXPeti(), viewModel.getYPeti(),
+                    viewModel.getLebarPeti(), viewModel.getTinggiPeti());
         }
 
-        if (viewModel.isLassoActive()) {
-            int playerCenterX = viewModel.getPlayerX() + viewModel.getPlayerDisplayWidth() / 2;
-            int playerCenterY = viewModel.getPlayerY() + viewModel.getPlayerDisplayHeight() / 2;
-            int mouseX = viewModel.getMousePosition().x;
-            int mouseY = viewModel.getMousePosition().y;
+        if (viewModel.apaLasoAktif()) {
+            int playerCenterX = viewModel.getXPemain() + viewModel.getLebarPemain() / 2;
+            int playerCenterY = viewModel.getYPemain() + viewModel.getTinggiPemain() / 2;
+            int mouseX = viewModel.getPosisiMouse().x;
+            int mouseY = viewModel.getPosisiMouse().y;
 
-            // Lasso now extends to the mouse position directly
-            g.setColor(Color.WHITE);
+            g.setColor(Color.ORANGE); // WARNA LASO DIUBAH DI SINI
             g.drawLine(playerCenterX, playerCenterY, mouseX, mouseY);
-            g.fillOval(mouseX - 5, mouseY - 5, 10, 10); // A dot at the end of the lasso
+            g.fillOval(mouseX - 5, mouseY - 5, 10, 10);
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        viewModel.updateGame();
+        viewModel.perbaruiGame();
         repaint();
     }
 }

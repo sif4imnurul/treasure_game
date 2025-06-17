@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GameViewModel {
-    // --- Properti tidak berubah ---
     private Player player;
     private List<Orc> orcs;
     private List<Treasure> treasures;
@@ -86,22 +85,18 @@ public class GameViewModel {
 
         topLaneY = (int) (gamePanelHeight * 0.25);
         bottomLaneY = (int) (gamePanelHeight * 0.75);
-
-        // --- (Kode loading gambar tidak diubah) ---
+        
         URL playerImageUrl = getClass().getClassLoader().getResource("assets/soldier-walk.png");
         if (playerImageUrl != null) {
             try {
                 fullSpriteSheetPlayer = ImageIO.read(playerImageUrl);
-                System.out.println("Sprite sheet pemain berhasil dimuat: " + playerImageUrl);
                 originalFrameWidthPlayer = fullSpriteSheetPlayer.getWidth() / 8;
                 originalFrameHeightPlayer = fullSpriteSheetPlayer.getHeight();
                 totalFramesPlayer = 8;
             } catch (IOException e) {
-                System.err.println("error: gagal memuat sprite sheet pemain: " + e.getMessage());
                 fullSpriteSheetPlayer = null;
             }
         } else {
-            System.err.println("error: sprite sheet pemain tidak ditemukan di assets/soldier-walk.png.");
             fullSpriteSheetPlayer = null;
         }
 
@@ -109,13 +104,10 @@ public class GameViewModel {
         if (playerHurtImageUrl != null) {
             try {
                 fullSpriteSheetPlayerHurt = ImageIO.read(playerHurtImageUrl);
-                System.out.println("Sprite sheet pemain hurt berhasil dimuat: " + playerHurtImageUrl);
             } catch (IOException e) {
-                System.err.println("error: gagal memuat sprite sheet pemain hurt: " + e.getMessage());
                 fullSpriteSheetPlayerHurt = null;
             }
         } else {
-            System.err.println("error: sprite sheet pemain hurt tidak ditemukan di assets/soldier-hurt.png.");
             fullSpriteSheetPlayerHurt = null;
         }
 
@@ -123,13 +115,10 @@ public class GameViewModel {
         if (backgroundImageUrl != null) {
             try {
                 backgroundImage = ImageIO.read(backgroundImageUrl);
-                System.out.println("Gambar latar belakang berhasil dimuat: " + backgroundImageUrl);
             } catch (IOException e) {
-                System.err.println("error: gagal memuat gambar latar belakang: " + e.getMessage());
                 backgroundImage = null;
             }
         } else {
-            System.err.println("error: gambar latar belakang tidak ditemukan di assets/background-cave.png.");
             backgroundImage = null;
         }
 
@@ -137,13 +126,10 @@ public class GameViewModel {
         if (orcImageUrl != null) {
             try {
                 fullSpriteSheetOrc = ImageIO.read(orcImageUrl);
-                System.out.println("Sprite sheet orc berhasil dimuat: " + orcImageUrl);
             } catch (IOException e) {
-                System.err.println("error: gagal memuat sprite sheet orc: " + e.getMessage());
                 fullSpriteSheetOrc = null;
             }
         } else {
-            System.err.println("error: sprite sheet orc tidak ditemukan di assets/orc-attack.png.");
             fullSpriteSheetOrc = null;
         }
 
@@ -151,14 +137,11 @@ public class GameViewModel {
         if (treasuresImageUrl != null) {
             try {
                 treasuresSpriteSheet = ImageIO.read(treasuresImageUrl);
-                System.out.println("Sprite sheet harta karun berhasil dimuat: " + treasuresImageUrl);
-                parseTreasureSprites();
+                uraiSpriteHartaKarun();
             } catch (IOException e) {
-                System.err.println("error: gagal memuat sprite sheet harta karun: " + e.getMessage());
                 treasuresSpriteSheet = null;
             }
         } else {
-            System.err.println("error: sprite sheet harta karun tidak ditemukan di assets/treasures.png.");
             treasuresSpriteSheet = null;
         }
 
@@ -166,13 +149,10 @@ public class GameViewModel {
         if (chestImageUrl != null) {
             try {
                 chestOpenImage = ImageIO.read(chestImageUrl);
-                System.out.println("Gambar peti terbuka berhasil dimuat: " + chestImageUrl);
             } catch (IOException e) {
-                System.err.println("error: gagal memuat gambar peti terbuka: " + e.getMessage());
                 chestOpenImage = null;
             }
         } else {
-            System.err.println("error: gambar peti terbuka tidak ditemukan di assets/chest-open.png.");
             chestOpenImage = null;
         }
 
@@ -201,9 +181,8 @@ public class GameViewModel {
         this.gameStartTime = System.currentTimeMillis();
         this.lastSpawnTime = System.currentTimeMillis();
     }
-
-    // --- (Metode lain sampai `spawnEntity` tidak berubah) ---
-    private void parseTreasureSprites() {
+    
+    private void uraiSpriteHartaKarun() {
         treasureSprites = new HashMap<>();
         if (treasuresSpriteSheet == null) return;
 
@@ -222,19 +201,17 @@ public class GameViewModel {
                             treasureSpriteHeight
                     );
                     rowImages.add(sprite);
-                } else {
-                    System.err.println("peringatan: melewatkan sprite harta karun di luar batas pada baris " + r + ", kolom " + c);
                 }
             }
             treasureSprites.put(r, rowImages);
         }
     }
 
-    public void setPlayerName(String playerName) {
+    public void aturNamaPemain(String playerName) {
         this.playerName = playerName;
     }
 
-    public void resetGame() {
+    public void ulangPermainan() {
         player.setPosX(gamePanelWidth / 2 - (player.getDisplayWidth() / 2));
         player.setPosY(gamePanelHeight / 2 - (player.getDisplayHeight() / 2));
         player.setVelocityX(0);
@@ -253,21 +230,19 @@ public class GameViewModel {
 
         isLassoActive = false;
         mousePosition = new Point(0, 0);
-
-        System.out.println("status permainan telah direset.");
     }
 
-    public void setGameOver(boolean gameOver) {
+    public void aturGameOver(boolean gameOver) {
         if (this.isGameOver == gameOver) return;
 
         this.isGameOver = gameOver;
         if (gameOver) {
-            saveGameResult(score, treasuresCollectedCount);
+            simpanHasilGame(score, treasuresCollectedCount);
             soundManager.playGameOverSound();
         }
     }
 
-    public void setPlayerMovementDirection(int keyCode, boolean isPressed) {
+    public void aturGerakPemain(int keyCode, boolean isPressed) {
         if (isGameOver) return;
 
         if (isPressed) {
@@ -293,17 +268,16 @@ public class GameViewModel {
         }
     }
 
-    public void setLassoActive(boolean active) {
+    public void aturLasoAktif(boolean active) {
         if (isGameOver) return;
         this.isLassoActive = active;
     }
 
-    public void updateMousePosition(int x, int y) {
+    public void perbaruiPosisiMouse(int x, int y) {
         this.mousePosition.setLocation(x, y);
     }
-
-    // --- [DIPERBARUI] Logika pembatasan Y ditambahkan di sini ---
-    private void spawnEntity() {
+    
+    private void munculinEntitas() {
         if (isGameOver) return;
 
         long currentTime = System.currentTimeMillis();
@@ -337,8 +311,7 @@ public class GameViewModel {
                 int originalOrcFrameWidth = fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getWidth() / 6 : 50;
                 int totalOrcFrames = 6;
                 int orcDisplayHeight = (fullSpriteSheetOrc != null ? fullSpriteSheetOrc.getHeight() : 50) * scaleFactorEnemy;
-
-                // Membatasi posisi Y untuk Orc agar tidak keluar panel
+                
                 if (spawnY + orcDisplayHeight > gamePanelHeight) {
                     spawnY = gamePanelHeight - orcDisplayHeight;
                 }
@@ -360,7 +333,6 @@ public class GameViewModel {
                 int clusterSize = random.nextInt(3) + 2;
                 int treasureLaneY = useTopLane ? topLaneY : bottomLaneY;
 
-                // Membatasi posisi Y untuk Harta Karun agar tidak keluar panel
                 if (treasureLaneY + treasureDisplaySize > gamePanelHeight) {
                     treasureLaneY = gamePanelHeight - treasureDisplaySize;
                 }
@@ -369,13 +341,11 @@ public class GameViewModel {
                 }
 
                 if (treasureSprites == null || treasureSprites.isEmpty()) {
-                    System.err.println("error: sprite harta karun tidak dimuat atau diurai. tidak dapat memunculkan harta karun.");
                     return;
                 }
                 int randomRow = random.nextInt(treasureSprites.size());
                 List<BufferedImage> selectedSprites = treasureSprites.get(randomRow);
                 if (selectedSprites == null || selectedSprites.isEmpty()) {
-                    System.err.println("tidak ada sprite ditemukan untuk baris: " + randomRow);
                     return;
                 }
                 int baseValue = (randomRow + 1) * 10;
@@ -403,9 +373,8 @@ public class GameViewModel {
             lastSpawnTime = currentTime;
         }
     }
-
-    // --- (Metode lain sampai `updateGame` tidak berubah) ---
-    private void checkLassoCollision() {
+    
+    private void cekKenaLaso() {
         if (isGameOver) return;
 
         int playerCenterX = player.getPosX() + player.getDisplayWidth() / 2;
@@ -421,7 +390,7 @@ public class GameViewModel {
             int orcCenterX = orc.getPosX() + orc.getDisplayWidth() / 2;
             int orcCenterY = orc.getPosY() + orc.getDisplayHeight() / 2;
 
-            if (isPointOnLineSegment(playerCenterX, playerCenterY, mouseX, mouseY, orcCenterX, orcCenterY, lassoGrabTolerance)) {
+            if (apaTitikAdaDiGaris(playerCenterX, playerCenterY, mouseX, mouseY, orcCenterX, orcCenterY, lassoGrabTolerance)) {
                 score -= 100;
                 orcIterator.remove();
                 isPlayerHurt = true;
@@ -430,8 +399,6 @@ public class GameViewModel {
                 currentFramePlayerHurt = 1;
 
                 soundManager.playHitSound();
-
-                System.out.println("pemain menangkap orc! status berubah menjadi hurt untuk " + (hurtDuration/1000.0) + " detik. skor: " + score);
             }
         }
 
@@ -445,7 +412,7 @@ public class GameViewModel {
             int treasureCenterX = treasure.getPosX() + treasure.getDisplayWidth() / 2;
             int treasureCenterY = treasure.getPosY() + treasure.getDisplayHeight() / 2;
 
-            if (isPointOnLineSegment(playerCenterX, playerCenterY, mouseX, mouseY, treasureCenterX, treasureCenterY, lassoGrabTolerance)) {
+            if (apaTitikAdaDiGaris(playerCenterX, playerCenterY, mouseX, mouseY, treasureCenterX, treasureCenterY, lassoGrabTolerance)) {
                 treasure.setCollected(true);
                 treasure.setTargetX(chestPosX + chestDisplayWidth / 2 - treasure.getDisplayWidth() / 2);
                 treasure.setTargetY(chestPosY + chestDisplayHeight / 2 - treasure.getDisplayHeight() / 2);
@@ -454,7 +421,7 @@ public class GameViewModel {
         }
     }
 
-    private boolean isPointOnLineSegment(int x1, int y1, int x2, int y2, int px, int py, double tolerance) {
+    private boolean apaTitikAdaDiGaris(int x1, int y1, int x2, int y2, int px, int py, double tolerance) {
         double lineLengthSq = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
         if (lineLengthSq == 0) {
             return Math.sqrt(Math.pow(px - x1, 2) + Math.pow(py - y1, 2)) < tolerance;
@@ -470,23 +437,20 @@ public class GameViewModel {
 
         return distance < tolerance;
     }
-
-    // --- [DIPERBARUI] Logika pembatasan untuk Player ditambahkan di sini ---
-    public void updateGame() {
+    
+    public void perbaruiGame() {
         if (isGameOver) return;
 
         if (System.currentTimeMillis() - gameStartTime >= gameDuration) {
-            setGameOver(true);
-            System.out.println("game over! waktu habis. skor akhir: " + score);
+            aturGameOver(true);
         }
 
-        spawnEntity();
+        munculinEntitas();
 
         if (isPlayerHurt) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - hurtStartTime >= hurtDuration) {
                 isPlayerHurt = false;
-                System.out.println("pemain kembali normal dari status hurt.");
             } else {
                 if (currentTime - lastFrameTimePlayerHurt > frameDelayPlayerHurt) {
                     currentFramePlayerHurt = (currentFramePlayerHurt == 1) ? 2 : 1;
@@ -494,20 +458,17 @@ public class GameViewModel {
                 }
             }
         }
-
-        // --- Logika pergerakan player ---
+        
         int newX = player.getPosX() + player.getVelocityX();
         int newY = player.getPosY() + player.getVelocityY();
-
-        // Membatasi pergerakan Player di sumbu X (horizontal)
+        
         if (newX < 0) {
             newX = 0;
         }
         if (newX + player.getDisplayWidth() > gamePanelWidth) {
             newX = gamePanelWidth - player.getDisplayWidth();
         }
-
-        // Membatasi pergerakan Player di sumbu Y (vertikal)
+        
         if (newY < 0) {
             newY = 0;
         }
@@ -517,8 +478,7 @@ public class GameViewModel {
 
         player.setPosX(newX);
         player.setPosY(newY);
-
-        // --- Sisa updateGame ---
+        
         Iterator<Orc> orcIterator = orcs.iterator();
         while (orcIterator.hasNext()) {
             Orc orc = orcIterator.next();
@@ -575,31 +535,33 @@ public class GameViewModel {
         }
 
         if (isLassoActive) {
-            checkLassoCollision();
+            cekKenaLaso();
         }
     }
 
-    // --- (Sisa metode tidak berubah) ---
-    private void saveGameResult(int skor, int count) {
+    private void simpanHasilGame(int skor, int count) {
         String queryCheck = "SELECT skor, count FROM thasil WHERE username = '" + this.playerName + "'";
         try (ResultSet rs = db.selectQuery(queryCheck)) {
             if (rs.next()) {
-                int existingScore = rs.getInt("skor");
-                if (skor > existingScore) {
-                    String sql = "UPDATE thasil SET skor = " + skor + ", count = " + count + " WHERE username = '" + this.playerName + "'";
-                    db.insertUpdateDeleteQuery(sql);
-                }
+                int skorLama = rs.getInt("skor");
+                int countLama = rs.getInt("count");
+
+                int totalSkorBaru = skorLama + skor;
+                int totalCountBaru = countLama + count;
+
+                String sql = "UPDATE thasil SET skor = " + totalSkorBaru + ", count = " + totalCountBaru + " WHERE username = '" + this.playerName + "'";
+                db.insertUpdateDeleteQuery(sql);
+                
             } else {
                 String sql = "INSERT INTO thasil (username, skor, count) VALUES ('" + this.playerName + "', " + skor + ", " + count + ")";
                 db.insertUpdateDeleteQuery(sql);
             }
         } catch (SQLException | RuntimeException e) {
-            System.err.println("gagal menyimpan/mengupdate skor dan count: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public List<String[]> getHighScores() {
+    public List<String[]> dapetinSkorTertinggi() {
         List<String[]> highScores = new ArrayList<>();
         String sql = "SELECT username, skor, count FROM thasil ORDER BY skor DESC";
         try (ResultSet rs = db.selectQuery(sql)) {
@@ -610,13 +572,12 @@ public class GameViewModel {
                 highScores.add(new String[]{username, String.valueOf(skor), String.valueOf(count)});
             }
         } catch (SQLException e) {
-            System.err.println("gagal mengambil highscores: " + e.getMessage());
             e.printStackTrace();
         }
         return highScores;
     }
 
-    public Image getCurrentPlayerFrame() {
+    public Image dapetinFramePemainSekarang() {
         BufferedImage currentSpriteSheet;
         int frameToUse = 0;
         int frameWidth = originalFrameWidthPlayer;
@@ -647,29 +608,29 @@ public class GameViewModel {
 
         return currentSpriteSheet.getSubimage(sourceX, 0, frameWidth, frameHeight);
     }
-
-    public Image getBackgroundImage() { return backgroundImage; }
-    public int getPlayerX() { return player.getPosX(); }
-    public int getPlayerY() { return player.getPosY(); }
-    public int getPlayerDisplayWidth() { return player.getDisplayWidth(); }
-    public int getPlayerDisplayHeight() { return player.getDisplayHeight(); }
-    public int getPlayerVelocityX() { return player.getVelocityX(); }
-    public List<Orc> getOrcs() { return orcs; }
-    public List<Treasure> getTreasures() { return treasures; }
-    public boolean isLassoActive() { return isLassoActive; }
-    public Point getMousePosition() { return mousePosition; }
-    public int getScore() { return score; }
-    public int getTreasuresCollectedCount() { return treasuresCollectedCount; }
-    public Image getChestOpenImage() { return chestOpenImage; }
-    public int getChestPosX() { return chestPosX; }
-    public int getChestPosY() { return chestPosY; }
-    public int getChestDisplayWidth() { return chestDisplayWidth; }
-    public int getChestDisplayHeight() { return chestDisplayHeight; }
-    public boolean isPlayerHurt() { return isPlayerHurt; }
-    public long getTimeLeft() {
+    
+    public Image getGambarLatar() { return backgroundImage; }
+    public int getXPemain() { return player.getPosX(); }
+    public int getYPemain() { return player.getPosY(); }
+    public int getLebarPemain() { return player.getDisplayWidth(); }
+    public int getTinggiPemain() { return player.getDisplayHeight(); }
+    public int getKecepatanXPemain() { return player.getVelocityX(); }
+    public List<Orc> getParaOrc() { return orcs; }
+    public List<Treasure> getHartaKarun() { return treasures; }
+    public boolean apaLasoAktif() { return isLassoActive; }
+    public Point getPosisiMouse() { return mousePosition; }
+    public int getSkor() { return score; }
+    public int getJumlahHartaTerkumpul() { return treasuresCollectedCount; }
+    public Image getGambarPeti() { return chestOpenImage; }
+    public int getXPeti() { return chestPosX; }
+    public int getYPeti() { return chestPosY; }
+    public int getLebarPeti() { return chestDisplayWidth; }
+    public int getTinggiPeti() { return chestDisplayHeight; }
+    public boolean apaPemainLagiSakit() { return isPlayerHurt; }
+    public long getSisaWaktu() {
         long elapsed = System.currentTimeMillis() - gameStartTime;
         long remaining = gameDuration - elapsed;
         return Math.max(0, remaining);
     }
-    public boolean isGameOver() { return isGameOver; }
+    public boolean apaGameSelesai() { return isGameOver; }
 }

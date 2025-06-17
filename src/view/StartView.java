@@ -22,22 +22,22 @@ public class StartView extends JPanel {
     private JFrame frameUtama;
     private Image gambarLatar;
 
-    private static final Dimension UKURAN_PANEL = new Dimension(1200, 800);
-    private static final Dimension UKURAN_TABEL = new Dimension(500, 250);
-    private static final String[] KOLOM_TABEL = {"Username", "Score", "Count"};
+    // --- Variabel diubah dari uppercase menjadi camelCase ---
+    private static final Dimension ukuranPanel = new Dimension(1200, 800);
+    private static final Dimension ukuranTabel = new Dimension(500, 250);
+    private static final String[] kolomTabel = {"Username", "Score", "Count"};
 
-    private static final Color WARNA_JUDUL = Color.YELLOW;
-    private static final Color WARNA_TEKS = Color.WHITE;
-    private static final Color WARNA_TOMBOL_MULAI = new Color(50, 150, 50, 220);
-    private static final Color WARNA_TRANSPARAN = new Color(0, 0, 0, 0);
-    private static final Color WARNA_INPUT_BACKGROUND = new Color(255, 255, 255, 200);
-
-    private static final Color WARNA_SEL_TABEL_BACKGROUND = new Color(0, 0, 0, 100);
+    private static final Color warnaJudul = Color.YELLOW;
+    private static final Color warnaTeks = Color.WHITE;
+    private static final Color warnaTombolMulai = new Color(50, 150, 50, 220);
+    private static final Color warnaTransparan = new Color(0, 0, 0, 0);
+    private static final Color warnaInputBackground = new Color(255, 255, 255, 200);
+    private static final Color warnaSelTabelBackground = new Color(0, 0, 0, 100);
 
     public StartView(GameViewModel viewModel, JFrame parentFrame) {
         this.viewModel = viewModel;
         this.frameUtama = parentFrame;
-        this.gambarLatar = viewModel.getBackgroundImage();
+        this.gambarLatar = viewModel.getGambarLatar();
 
         inisialisasiPanel();
         buatKomponenUI();
@@ -46,7 +46,7 @@ public class StartView extends JPanel {
     }
 
     private void inisialisasiPanel() {
-        setPreferredSize(UKURAN_PANEL);
+        setPreferredSize(ukuranPanel); // DIUBAH
         setLayout(new GridBagLayout());
         setOpaque(true);
     }
@@ -56,20 +56,16 @@ public class StartView extends JPanel {
         gbc.insets = new Insets(10, 10, 10, 10);
 
         buatJudulGame(gbc);
-
         buatInputNamaPemain(gbc);
-
         buatTombolMulai(gbc);
-
         buatTabelSkorTertinggi(gbc);
-
         buatTombolKeluar(gbc);
     }
 
     private void buatJudulGame(GridBagConstraints gbc) {
-        JLabel labelJudul = new JLabel("COLLECT THE SKILL BALLS");
-        labelJudul.setFont(new Font("Arial", Font.BOLD, 48));
-        labelJudul.setForeground(WARNA_JUDUL);
+        JLabel labelJudul = new JLabel("Treasure Lasso");
+        labelJudul.setFont(new Font("Verdana", Font.BOLD, 48));
+        labelJudul.setForeground(warnaJudul); // DIUBAH
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -81,7 +77,7 @@ public class StartView extends JPanel {
     private void buatInputNamaPemain(GridBagConstraints gbc) {
         JLabel labelUsername = new JLabel("Username");
         labelUsername.setFont(new Font("Arial", Font.BOLD, 24));
-        labelUsername.setForeground(WARNA_TEKS);
+        labelUsername.setForeground(warnaTeks); // DIUBAH
 
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -91,7 +87,7 @@ public class StartView extends JPanel {
 
         inputNamaPemain = new JTextField(15);
         inputNamaPemain.setFont(new Font("Arial", Font.PLAIN, 24));
-        inputNamaPemain.setBackground(WARNA_INPUT_BACKGROUND);
+        inputNamaPemain.setBackground(warnaInputBackground); // DIUBAH
         inputNamaPemain.setForeground(Color.BLACK);
 
         gbc.gridx = 1;
@@ -102,8 +98,8 @@ public class StartView extends JPanel {
     private void buatTombolMulai(GridBagConstraints gbc) {
         tombolMulai = new JButton("Play");
         tombolMulai.setFont(new Font("Arial", Font.BOLD, 36));
-        tombolMulai.setBackground(WARNA_TOMBOL_MULAI);
-        tombolMulai.setForeground(WARNA_TEKS);
+        tombolMulai.setBackground(warnaTombolMulai); // DIUBAH
+        tombolMulai.setForeground(warnaTeks); // DIUBAH
         tombolMulai.setFocusPainted(false);
         tombolMulai.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
 
@@ -115,7 +111,7 @@ public class StartView extends JPanel {
     }
 
     private void buatTabelSkorTertinggi(GridBagConstraints gbc) {
-        modelTabel = new DefaultTableModel(KOLOM_TABEL, 0) {
+        modelTabel = new DefaultTableModel(kolomTabel, 0) { // DIUBAH
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -128,7 +124,7 @@ public class StartView extends JPanel {
         aturRendererTabel();
 
         JScrollPane scrollPane = new JScrollPane(tabelSkorTertinggi);
-        scrollPane.setPreferredSize(UKURAN_TABEL);
+        scrollPane.setPreferredSize(ukuranTabel); // DIUBAH
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
@@ -148,15 +144,15 @@ public class StartView extends JPanel {
         tabelSkorTertinggi.setFillsViewportHeight(true);
         tabelSkorTertinggi.setShowGrid(true);
         tabelSkorTertinggi.setGridColor(Color.BLACK);
-        tabelSkorTertinggi.setSelectionForeground(WARNA_TEKS);
+        tabelSkorTertinggi.setSelectionForeground(warnaTeks); // DIUBAH
 
         tabelSkorTertinggi.setOpaque(false);
-        tabelSkorTertinggi.setBackground(WARNA_TRANSPARAN);
+        tabelSkorTertinggi.setBackground(warnaTransparan); // DIUBAH
 
         JTableHeader header = tabelSkorTertinggi.getTableHeader();
         header.setOpaque(true);
         header.setBackground(new Color(50, 50, 50, 200));
-        header.setForeground(WARNA_TEKS);
+        header.setForeground(warnaTeks); // DIUBAH
         header.setFont(new Font("Arial", Font.BOLD, 22));
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
     }
@@ -167,8 +163,8 @@ public class StartView extends JPanel {
             public Component getTableCellRendererComponent(JTable table, Object value,
                                                            boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                c.setForeground(WARNA_TEKS);
-                c.setBackground(WARNA_SEL_TABEL_BACKGROUND);
+                c.setForeground(warnaTeks); // DIUBAH
+                c.setBackground(warnaSelTabelBackground); // DIUBAH
 
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
                 return c;
@@ -186,7 +182,7 @@ public class StartView extends JPanel {
         tombolKeluar.setOpaque(false);
         tombolKeluar.setContentAreaFilled(false);
         tombolKeluar.setBorderPainted(false);
-        tombolKeluar.setForeground(WARNA_TEKS);
+        tombolKeluar.setForeground(warnaTeks); // DIUBAH
         tombolKeluar.setFocusPainted(false);
 
         gbc.gridx = 0;
@@ -220,8 +216,8 @@ public class StartView extends JPanel {
     }
 
     private void mulaiGame(String namaPemain) {
-        viewModel.setPlayerName(namaPemain);
-        viewModel.resetGame();
+        viewModel.aturNamaPemain(namaPemain);
+        viewModel.ulangPermainan();
 
         frameUtama.getContentPane().removeAll();
         GameView gameView = new GameView(viewModel, frameUtama);
@@ -246,7 +242,7 @@ public class StartView extends JPanel {
     private void muatDataSkorTertinggi() {
         modelTabel.setRowCount(0);
 
-        List<String[]> daftarSkorTertinggi = viewModel.getHighScores();
+        List<String[]> daftarSkorTertinggi = viewModel.dapetinSkorTertinggi();
         for (String[] dataBaris : daftarSkorTertinggi) {
             modelTabel.addRow(dataBaris);
         }
