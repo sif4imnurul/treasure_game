@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GameViewModel {
+    // Variabel game.
     private Player player;
     private List<Orc> orcs;
     private List<Treasure> treasures;
@@ -76,6 +77,7 @@ public class GameViewModel {
     private String playerName = "Guest";
     private final SoundManager soundManager;
 
+    // inisialisasi dan muat aset.
     public GameViewModel(int panelWidth, int panelHeight, SoundManager soundManager) {
         this.gamePanelWidth = panelWidth;
         this.gamePanelHeight = panelHeight;
@@ -156,6 +158,7 @@ public class GameViewModel {
             chestOpenImage = null;
         }
 
+        // objek pemain
         int playerDisplayWidth = originalFrameWidthPlayer * scaleFactorPlayer;
         int playerDisplayHeight = originalFrameHeightPlayer * scaleFactorPlayer;
 
@@ -167,6 +170,7 @@ public class GameViewModel {
                 fullSpriteSheetPlayer
         );
 
+        // objek orc
         orcs = new ArrayList<>();
         treasures = new ArrayList<>();
 
@@ -182,6 +186,7 @@ public class GameViewModel {
         this.lastSpawnTime = System.currentTimeMillis();
     }
     
+    // gambar harta karun 
     private void uraiSpriteHartaKarun() {
         treasureSprites = new HashMap<>();
         if (treasuresSpriteSheet == null) return;
@@ -211,6 +216,7 @@ public class GameViewModel {
         this.playerName = playerName;
     }
 
+    // reset game ke awal
     public void ulangPermainan() {
         player.setPosX(gamePanelWidth / 2 - (player.getDisplayWidth() / 2));
         player.setPosY(gamePanelHeight / 2 - (player.getDisplayHeight() / 2));
@@ -232,6 +238,7 @@ public class GameViewModel {
         mousePosition = new Point(0, 0);
     }
 
+    // posiis gameover dan simpan skor
     public void aturGameOver(boolean gameOver) {
         if (this.isGameOver == gameOver) return;
 
@@ -242,6 +249,7 @@ public class GameViewModel {
         }
     }
 
+    // gerakan pemain (keybiard)
     public void aturGerakPemain(int keyCode, boolean isPressed) {
         if (isGameOver) return;
 
@@ -268,15 +276,18 @@ public class GameViewModel {
         }
     }
 
+    // switch laso
     public void aturLasoAktif(boolean active) {
         if (isGameOver) return;
         this.isLassoActive = active;
     }
 
+    // baca posisi mouse 
     public void perbaruiPosisiMouse(int x, int y) {
         this.mousePosition.setLocation(x, y);
     }
     
+    // memunculkan orc dan harta karun secara acak.
     private void munculinEntitas() {
         if (isGameOver) return;
 
@@ -374,6 +385,7 @@ public class GameViewModel {
         }
     }
     
+    // cek laso kena harta atau orc atau tidak
     private void cekKenaLaso() {
         if (isGameOver) return;
 
@@ -438,6 +450,7 @@ public class GameViewModel {
         return distance < tolerance;
     }
     
+    // perbarui state game.
     public void perbaruiGame() {
         if (isGameOver) return;
 
@@ -539,6 +552,7 @@ public class GameViewModel {
         }
     }
 
+    // menyimpan hasil game ke database.
     private void simpanHasilGame(int skor, int count) {
         String queryCheck = "SELECT skor, count FROM thasil WHERE username = '" + this.playerName + "'";
         try (ResultSet rs = db.selectQuery(queryCheck)) {
@@ -550,17 +564,18 @@ public class GameViewModel {
                 int totalCountBaru = countLama + count;
 
                 String sql = "UPDATE thasil SET skor = " + totalSkorBaru + ", count = " + totalCountBaru + " WHERE username = '" + this.playerName + "'";
-                db.insertUpdateDeleteQuery(sql);
+                db.insertUpdateQuery(sql);
                 
             } else {
                 String sql = "INSERT INTO thasil (username, skor, count) VALUES ('" + this.playerName + "', " + skor + ", " + count + ")";
-                db.insertUpdateDeleteQuery(sql);
+                db.insertUpdateQuery(sql);
             }
         } catch (SQLException | RuntimeException e) {
             e.printStackTrace();
         }
     }
 
+    // daftar skor tertinggi dari database.
     public List<String[]> dapetinSkorTertinggi() {
         List<String[]> highScores = new ArrayList<>();
         String sql = "SELECT username, skor, count FROM thasil ORDER BY skor DESC";
@@ -577,6 +592,7 @@ public class GameViewModel {
         return highScores;
     }
 
+    // frame animasi pemain saat ini.
     public Image dapetinFramePemainSekarang() {
         BufferedImage currentSpriteSheet;
         int frameToUse = 0;
@@ -609,6 +625,7 @@ public class GameViewModel {
         return currentSpriteSheet.getSubimage(sourceX, 0, frameWidth, frameHeight);
     }
     
+    // getter yang diakses oleh View
     public Image getGambarLatar() { return backgroundImage; }
     public int getXPemain() { return player.getPosX(); }
     public int getYPemain() { return player.getPosY(); }

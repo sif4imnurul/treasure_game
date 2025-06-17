@@ -4,16 +4,16 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 public class Treasure {
-    private int posX;
-    private int posY;
-    private int displayWidth;
-    private int displayHeight;
-    private BufferedImage image;
-    private int velocityX;
-    private boolean isCollected;
-    private int targetX;
-    private int targetY;
-    private int value;
+    private int posX;             // posisi horizontal harta karun
+    private int posY;             // posisi vertikal harta karun
+    private int displayWidth;     // lebar harta karun
+    private int displayHeight;    // tinggi harta karun
+    private BufferedImage image;  // gambar harta karun
+    private int velocityX;        // kecepatan harta karun horizontal
+    private boolean isCollected;  // status terkumpul
+    private int targetX;          // target posisi x
+    private int targetY;          // target posisi y
+    private int value;            // nilai skor
 
     public Treasure(int posX, int posY, int displayWidth, int displayHeight, BufferedImage image, int initialVelocityX, int value) {
         this.posX = posX;

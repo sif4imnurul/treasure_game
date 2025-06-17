@@ -3,17 +3,17 @@ package model;
 import java.awt.image.BufferedImage;
 
 public class Orc {
-    private int posX;
-    private int posY;
-    private int displayWidth;
-    private int displayHeight;
-    private BufferedImage fullSpriteSheet;
-    private int velocityX;
-    private int currentFrame;
-    private int originalFrameWidth;
-    private int totalFrames;
-    private long lastFrameTime;
-    private final long FrameDelay = 100;
+    private int posX; // posisi horizontal orc
+    private int posY; // posisi vertikal orc
+    private int displayWidth; // lebar orc
+    private int displayHeight; // tinggi orc
+    private BufferedImage fullSpriteSheet; // gambar spritesheet 
+    private int velocityX; // kecepatan orc hor
+    private int currentFrame; // frame yang ditampilkan
+    private int originalFrameWidth; // ukuran 1 gambar di spritesheet
+    private int totalFrames; // total frame orc
+    private long lastFrameTime; // timestamp frame terakhir update
+    private final long FrameDelay = 100; // jeda frame dan animasi
 
     public Orc(int posX, int posY, int displayWidth, int displayHeight, BufferedImage fullSpriteSheet, int initialVelocityX, int originalFrameWidth, int totalFrames) {
         this.posX = posX;
@@ -25,7 +25,7 @@ public class Orc {
         this.originalFrameWidth = originalFrameWidth;
         this.totalFrames = totalFrames;
         this.lastFrameTime = System.currentTimeMillis();
-        this.currentFrame = 0; // Initialize currentFrame
+        this.currentFrame = 0; 
     }
 
     public int getPosX() { return posX; }

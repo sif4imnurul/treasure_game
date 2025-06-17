@@ -1,6 +1,5 @@
 package view;
 
-// import model.Player;
 import viewmodel.GameViewModel;
 import model.Orc;
 import model.Treasure;
@@ -16,6 +15,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 public class GameView extends JPanel implements ActionListener {
+    // referensi ke GameViewModel dan frame utama + ( waktu game)
     private GameViewModel viewModel;
     private Timer gameLoopTimer;
     private JFrame parentFrame;
@@ -23,6 +23,7 @@ public class GameView extends JPanel implements ActionListener {
     private static final int PANEL_WIDTH = 1200;
     private static final int PANEL_HEIGHT = 800;
 
+    // menyiapkan panel game
     public GameView(GameViewModel viewModel, JFrame parentFrame) {
         this.viewModel = viewModel;
         this.parentFrame = parentFrame;
@@ -30,6 +31,7 @@ public class GameView extends JPanel implements ActionListener {
         this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         this.setFocusable(true);
 
+        // input keyboard.
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -56,6 +58,7 @@ public class GameView extends JPanel implements ActionListener {
             }
         });
 
+        //  input mouse.
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -72,6 +75,7 @@ public class GameView extends JPanel implements ActionListener {
             }
         });
 
+         // baca gerakan mouse.
         this.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -90,6 +94,7 @@ public class GameView extends JPanel implements ActionListener {
         gameLoopTimer.start();
     }
 
+     // tampilkan
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -97,6 +102,7 @@ public class GameView extends JPanel implements ActionListener {
     }
 
     private void draw(Graphics g) {
+        // background
         Image backgroundImage = viewModel.getGambarLatar();
         if (backgroundImage != null) {
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
@@ -105,6 +111,7 @@ public class GameView extends JPanel implements ActionListener {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
+        // pemain
         Image currentPlayerFrame = viewModel.dapetinFramePemainSekarang();
         int playerX = viewModel.getXPemain();
         int playerY = viewModel.getYPemain();
@@ -120,6 +127,7 @@ public class GameView extends JPanel implements ActionListener {
             }
         }
 
+        // semua orc
         List<Orc> orcs = viewModel.getParaOrc();
         for (Orc orc : orcs) {
             Image orcFrame = null;
@@ -142,6 +150,7 @@ public class GameView extends JPanel implements ActionListener {
             }
         }
 
+        // harta karun
         List<Treasure> treasures = viewModel.getHartaKarun();
         for (Treasure treasure : treasures) {
             Image treasureImage = treasure.getImage();
@@ -153,6 +162,7 @@ public class GameView extends JPanel implements ActionListener {
             }
         }
 
+        // tampilan skor waktu hitung
         g.setColor(Color.WHITE);
         g.setFont(new Font("Verdana", Font.BOLD, 24));
         g.drawString("Score: " + viewModel.getSkor(), 10, 30);
@@ -176,6 +186,7 @@ public class GameView extends JPanel implements ActionListener {
         }
         g.drawString(timeString, 10, 90);
 
+        // peti
         Image chestImage = viewModel.getGambarPeti();
         if (chestImage != null) {
             g.drawImage(chestImage, viewModel.getXPeti(), viewModel.getYPeti(),
@@ -186,6 +197,7 @@ public class GameView extends JPanel implements ActionListener {
                     viewModel.getLebarPeti(), viewModel.getTinggiPeti());
         }
 
+        //laso
         if (viewModel.apaLasoAktif()) {
             int playerCenterX = viewModel.getXPemain() + viewModel.getLebarPemain() / 2;
             int playerCenterY = viewModel.getYPemain() + viewModel.getTinggiPemain() / 2;
@@ -198,6 +210,7 @@ public class GameView extends JPanel implements ActionListener {
         }
     }
 
+    // memperbarui logika dan tampilkan ulang tampilan
     @Override
     public void actionPerformed(ActionEvent e) {
         viewModel.perbaruiGame();

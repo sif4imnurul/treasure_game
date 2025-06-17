@@ -9,6 +9,7 @@ public class SoundManager {
 
     private Clip coinSound, hitSound, gameOverSound, backgroundMusic;
 
+    // memuat semua file suara 
     public SoundManager() {
         coinSound = loadSound("/assets/coin.wav");
         hitSound = loadSound("/assets/hit.wav");
@@ -16,11 +17,13 @@ public class SoundManager {
         backgroundMusic = loadSound("/assets/backsound.wav");
     }
 
+
+    // ubah file suara supaya bisa di play
     private Clip loadSound(String path) {
         try {
             InputStream audioSrc = SoundManager.class.getResourceAsStream(path);
             if (audioSrc == null) {
-                // System.err.println("File suara tidak ditemukan di path: " + path);
+                // System.err.println(" gagal " + path);
                 return null;
             }
 
@@ -31,40 +34,41 @@ public class SoundManager {
             clip.open(audioStream);
             return clip;
         } catch (Exception e) {
-            // System.err.println("Gagal memuat suara dari path: " + path);
+            // System.err.println("gagal " + path);
             e.printStackTrace();
             return null;
         }
     }
 
-    // Metode untuk memainkan suara efek (satu kali)
+    // memainkan suara sekali
     private void playClip(Clip clip) {
         if (clip != null) {
             if (clip.isRunning()) {
-                clip.stop(); // Hentikan jika sedang berjalan
+                clip.stop(); // hentikan kalau sedang berjalan
             }
-            clip.setFramePosition(0); // Selalu mulai dari awal
+            clip.setFramePosition(0); // mulai dari awal
             clip.start();
         }
     }
 
-    // Metode publik untuk dipanggil dari ViewModel
+    // suara koin.
     public void playCoinSound() {
         playClip(coinSound);
     }
 
+    // suara pemain kena serangan orc
     public void playHitSound() {
         playClip(hitSound);
     }
-
+    // suara game over.
     public void playGameOverSound() {
         playClip(gameOverSound);
     }
 
-    // Metode untuk memainkan musik latar secara berulang
+    // memainkan musik latar 
     public void playBackgroundMusic() {
         if (backgroundMusic != null) {
-            // HANYA mulai jika musiknya belum berjalan.
+            // hanya akan mulai jika si musiknya belum berjalan.
             if (backgroundMusic.isRunning()) {
                 return;
             }
@@ -73,7 +77,7 @@ public class SoundManager {
         }
     }
 
-    // Metode untuk menghentikan musik latar
+    // menghentikan musik latar berulang kali.
     public void stopBackgroundMusic() {
         if (backgroundMusic != null && backgroundMusic.isRunning()) {
             backgroundMusic.stop();

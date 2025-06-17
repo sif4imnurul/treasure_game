@@ -1,6 +1,12 @@
-// Saya sifa imania dengan NIM 2312084 mengerjakan evaluasi Tugas Masa Depan dalam mata kuliah 
+// Saya Sifa Imania Nurul Hidayah mengerjakan evaluasi Tugas Masa Depan dalam mata kuliah 
 // Desain dan Pemrograman Berorientasi Objek untuk keberkahanNya maka saya 
 // tidak melakukan kecurangan seperti yang telah dispesifikasikan. Aamiin. 
+
+// Lisensi
+// backsound-game = https://freetouse.com/music (Zambolino-playing games)
+// collect treasure = https://mixkit.co/free-sound-effects (mixkit-coins-sound-2003)
+// minus score = https://mixkit.co/free-sound-effects/ (mixkit-paper-quick-slice-2384)
+// gameover =  https://mixkit.co/free-sound-effects (mixkit-funny-fail-low-tone-2876)
 
 import view.StartView;
 import viewmodel.GameViewModel;
@@ -27,9 +33,9 @@ public class Main {
             StartView startView = new StartView(viewModel, frame);
             frame.add(startView);
 
-            frame.pack(); // Hitung ukuran window 
-            frame.setLocationRelativeTo(null); // atur lokasi ke tengah
-            frame.setVisible(true); // Tampilkan window
+            frame.pack(); 
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true); 
 
             startView.requestFocusInWindow();
         });

@@ -1,0 +1,8 @@
+javac -cp lib/mysql-connector-j-9.3.0.jar -d out src\model\*.java
+javac -cp lib/mysql-connector-j-9.3.0.jar -d out src\sound\*.java
+javac -cp lib/mysql-connector-j-9.3.0.jar -d out src\config\*.java
+javac -cp "lib/mysql-connector-j-9.3.0.jar;out" -d out src\viewmodel\*.java
+javac -cp "lib/mysql-connector-j-9.3.0.jar;out" -d out src\view\*.java
+javac -cp "lib/mysql-connector-j-9.3.0.jar;out" -d out src\Main.java
+java -cp "out;lib/mysql-connector-j-9.3.0.jar" Main
+

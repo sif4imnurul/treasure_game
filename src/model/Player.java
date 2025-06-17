@@ -4,13 +4,13 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 public class Player {
-    private int posX;
-    private int posY;
-    private int displayWidth;
-    private int displayHeight;
-    private BufferedImage image; 
-    private int velocityX;
-    private int velocityY;
+    private int posX;             // posisi horizontal pemain
+    private int posY;             // posisi vertikal pemain
+    private int displayWidth;     // lebar pemain
+    private int displayHeight;    // tinggi pemain
+    private BufferedImage image;  // gambar pemain
+    private int velocityX;        // kecepatan pemain horizon
+    private int velocityY;        // kecepatan pemain vert
 
     public Player(int posX, int posY, int displayWidth, int displayHeight, BufferedImage image) {
         this.posX = posX;
