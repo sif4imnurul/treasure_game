@@ -46,7 +46,7 @@ public class StartView extends JPanel {
     }
 
     private void inisialisasiPanel() {
-        setPreferredSize(ukuranPanel); // DIUBAH
+        setPreferredSize(ukuranPanel);
         setLayout(new GridBagLayout());
         setOpaque(true);
     }
